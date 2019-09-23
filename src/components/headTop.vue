@@ -1,7 +1,7 @@
 <template>
     <div class="header_container" >
 <!--        {{count}}-->
-        <el-button v-if="ok" type="primary" plain @click="back">返回</el-button>
+        <el-button v-if="ok" type="primary" plain @click="back" style="margin-right: 15px">返回</el-button>
         <img :src="imgUrl" style="width:30px;" alt="">
         <p style="margin:15px;font-size: 25px;color:#1d90e6;">银翔科技智能运维平台</p>
         <el-breadcrumb separator="/" style="margin-right:auto;padding: 10px;">

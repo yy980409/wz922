@@ -36,7 +36,12 @@
 					},
 					tooltip : {
 						trigger: 'axis',
-						// formatter: '{b0}: {c0}<br />{b1}: {c1}'
+						confine:true,
+						formatter: function(params){
+							let time=new Date(parseInt(params[0].axisValue)).toLocaleString().replace(/:\d{1,2}$/,' ');
+							let res='时间 : '+time+'<br>'+params[0].seriesName+' : '+params[0].data[1];
+							return res;
+                        }
 					},
 					xAxis : {
 						type : 'time',
@@ -63,7 +68,22 @@
 						color:'#1d90e6',
 						areaStyle: {
 
-							normal: {color:'#1d90e6',shadowColor: 'rgba(0, 0, 0, 0.5)',
+							normal: {
+								// color:'#1d90e6',
+								color: {
+									type: 'linear',
+									x: 0,
+									y: 0,
+									x2: 1,
+									y2: 0,
+									colorStops: [{
+										offset: 0, color: '#1d90e6'  // 0% 处的颜色
+									}, {
+										offset: 1, color: '#57dde6' // 100% 处的颜色
+									}],
+									global: false // 缺省为 false
+								},
+                                shadowColor: 'rgba(0, 0, 0, 0.5)',
 								shadowBlur: 10},
 						},
 						data:dataIn,

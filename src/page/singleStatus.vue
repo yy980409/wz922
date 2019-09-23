@@ -1,91 +1,81 @@
 <template>
     <div class="fillcontain" style="background-color: #f4f5f7;;min-height: 1000px">
         <head-top ok="true" :count="tt"></head-top>
-<!--        {{card2row}}<br><br>{{card}}<br><br>{{card2row2}}-->
-        <el-divider >设备号</el-divider>
-        <el-row :gutter="0" type="flex" justify="center" class="row-bg">
+{{temperature}}
+        <el-tabs v-model="tabActiveName"  type="border-card" >
 
-            <el-col :span="10" >
-<!--                <el-card class="box-card1" style="height: 360px;background-color: #f3f4f6;" body-style=padding:5px >-->
-<!--                <el-col :span="16" style="border-radius: 8px;background-color: #fcfcfc;">-->
-                <el-card class="box-card1"   >
-                    <el-col :span="16" >
-                    <lineMap id="line2" :info="temperature" name="温度"></lineMap>
-                </el-col>
-                <el-col :span="8" >
+            <el-tab-pane label="设备信息" name="first" style="min-height: 850px">
+                <el-divider><p style="font-size: 25px;color: #a9a9ab ">{{device_id}}设备信息</p></el-divider>
 
-                    <div style="height:330px;width:500px;display: table-cell;vertical-align:middle;text-align: center;">
-                        <p style="color:#1d90e6;font-size:30px;">最新数据</p>
-                        <p style="color:#1d90e6;font-size:30px;">{{temperature[0][1]}}℃</p>
-                        <p style="color:#a9aaff;font-size:30px;"></p>
-<!--                        <p style="color:#a9aaff;font-size:20px;">更新于:{{}}</p>-->
-                    </div>
+                <el-row :gutter="0" type="flex" justify="center" class="row-bg">
 
-                </el-col>
-                </el-card>
+                    <el-col :span="10" >
+                        <!--                <el-card class="box-card1" style="height: 360px;background-color: #f3f4f6;" body-style=padding:5px >-->
+                        <!--                <el-col :span="16" style="border-radius: 8px;background-color: #fcfcfc;">-->
+                        <el-card class="box-card1"   >
+                            <el-col :span="16" >
+                                <lineMap id="line2" :info="temperature" name="温度"></lineMap>
+                            </el-col>
+                            <el-col :span="8" >
 
-            </el-col>
+                                <div style="height:330px;width:500px;display: table-cell;vertical-align:middle;text-align: center;">
+                                    <p style="color:#1d90e6;font-size:30px;">最新数据</p>
+                                    <p style="color:#1d90e6;font-size:30px;">{{temperature[0][1]}}℃</p>
+                                    <p style="color:#a9aaff;font-size:30px;"></p>
+                                    <!--                        <p style="color:#a9aaff;font-size:20px;">更新于:{{}}</p>-->
+                                </div>
 
+                            </el-col>
+                        </el-card>
 
-            <el-col :span="10" style="">
-            <el-card class="box-card2"  >
-            <el-col :span="16" >
-                <lineMap id="line3" :info="humidity" name="湿度" ></lineMap>
-            </el-col>
-
-            <el-col :span="8">
-                <div style="height:330px;width:500px;display: table-cell;vertical-align:middle;text-align: center;">
-                <p style="color:#1d90e6;font-size:30px;">最新数据</p>
-                <p style="color:#1d90e6;font-size:30px;">{{humidity[0][1]}}%RH</p>
-                <p style="color:#1d90e6;font-size:30px;"></p>
-<!--                <p style="color:#a9aaff;font-size:20px;">更新于:</p>-->
-                </div>
-            </el-col>
-            </el-card>
-            </el-col>
-        </el-row>
+                    </el-col>
 
 
+                    <el-col :span="10" style="">
+                        <el-card class="box-card2"  >
+                            <el-col :span="16" >
+                                <lineMap id="line3" :info="humidity" name="湿度" ></lineMap>
+                            </el-col>
+
+                            <el-col :span="8">
+                                <div style="height:330px;width:500px;display: table-cell;vertical-align:middle;text-align: center;">
+                                    <p style="color:#1d90e6;font-size:30px;">最新数据</p>
+                                    <p style="color:#1d90e6;font-size:30px;">{{humidity[0][1]}}%RH</p>
+                                    <p style="color:#1d90e6;font-size:30px;"></p>
+                                    <!--                <p style="color:#a9aaff;font-size:20px;">更新于:</p>-->
+                                </div>
+                            </el-col>
+                        </el-card>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="0" type="flex" justify="center" class="row-bg2"
+                        v-for="(row,Rindex) in card2row"
+                        :key="Rindex"
+                >
+                    <el-col :span="5" v-for="(cc,index) in row" :key="index">
+                        <el-card   class="box-card3-1"  >
+                            <el-col :span="8" style="margin-top: 15px;">
+                                <div class="title" >
+
+                                    <i class="el-icon-cpu" style="color: #1c8de0;"></i>
+                                    {{cc.title}}
+
+                                </div>
+                            </el-col>
 
 
-        <el-row :gutter="0" type="flex" justify="center" class="row-bg2"
-                v-for="(row,Rindex) in card2row"
-                :key="Rindex"
-        >
-            <el-col :span="5" v-for="(cc,index) in row"
-                    :key="index"
-
-            >
-
-
-
-
-
-
-
-
-                    <el-card   class="box-card3-1"  >
-                        <el-col :span="8" style="margin-top: 15px;">
-                            <div class="title" >
-
-                                <i class="el-icon-cpu" style="color: #1c8de0;"></i>
-                                {{cc.title}}
-
-                            </div>
-                        </el-col>
-
-
-                        <el-col :span="1">
+                            <el-col :span="1">
                     <span style="
                     padding:20px 0px 90px 0px;
                     margin-top: 0px;
                     border-left: 1px solid #e3e4e6;
                     font-size: 0;
                     "></span>
-                        </el-col>
+                            </el-col>
 
 
-                        <el-col :span="16"style="margin-top: 15px" >
+                            <el-col :span="16"style="margin-top: 15px" >
 
                     <span class="subtitle" >
                             <el-row style="" :class="{num1:cc.subtitles.length===1,num2:cc.subtitles.length===2,num3:cc.subtitles.length===3,num4:cc.subtitles.length===4}">
@@ -116,7 +106,6 @@
 
                     </div>
 b
-                            <el-button  slot="reference" style="margin-left: 160px">233</el-button>
                         </el-popover>
 
                         <el-popover
@@ -151,22 +140,130 @@ b
                     </div>
 
 
-                            <el-button  slot="reference">233</el-button>
                         </el-popover>
 
 
 
 
                     </span>
-                        </el-col>
-                        <!--                    border: 1px solid #e3e4e6;-->
-                    </el-card >
-            </el-col>
+                            </el-col>
+                            <!--                    border: 1px solid #e3e4e6;-->
+                        </el-card >
+                    </el-col>
 
 
 
 
-        </el-row>
+                </el-row>
+            </el-tab-pane>
+
+            <el-tab-pane label="设备控制" name="second" style="min-height: 850px">
+                <el-divider><p style="font-size: 25px;color: #a9a9ab "> 设备控制</p></el-divider>
+
+                <el-row :gutter="0" type="flex" justify="center" class="row-bg2"
+                        v-for="(row,Rindex) in card2row2"
+                        :key="(Rindex+1)*2"
+                >
+                    <el-col :span="5" v-for="(cc,index) in row"
+                            :key="index"
+                    >
+                        <el-card class="box-card4">
+                            <div  v-if="cc.title==='风扇'" style="text-align: center;font-size: 20px;">
+                                <span class="demonstration" >风扇转速</span><br>
+                                <el-switch
+                                    v-model="autoOpen"
+                                    active-text="手动控制"
+                                    inactive-text="自动控制"
+                                    inactive-color="#409EFF"
+                                    @change="handleFanAuto"
+
+                                >
+                                </el-switch><br>
+                                <el-switch
+                                    v-if="autoOpen"
+                                    v-model="sliderOpen"
+                                    active-text="开"
+                                    inactive-text="关"
+                                    @change="handleFanSwitch"
+
+                                >
+                                </el-switch>
+                                <el-slider v-if="andOpen" class="FanDefalut" v-model="fanSpeed" @change="handleFanSpeed" ></el-slider>
+                            </div>
+
+                            <div  v-if="cc.title==='重合闸'" style="text-align: center;font-size: 20px;">
+                                <div class="demonstration" >重合闸开关</div>
+                                <br>
+                                <el-button @click="rebootPower">重启</el-button>
+                                <el-switch
+                                    v-model="powerSwitch"
+                                    active-text="合闸"
+                                    inactive-text="分闸"
+                                    @change="handlePowerSwitch"
+                                >
+
+                                </el-switch>
+
+                            </div>
+
+                            <el-button slot="reference" class="box-card3-1"  >
+                                <el-col :span="8" style="margin-top: 15px;">
+                                    <div class="title" >
+
+                                        <i class="el-icon-cpu" style="color: #1c8de0;"></i>
+                                        {{cc.title}}
+
+                                    </div>
+                                </el-col>
+
+
+                                <el-col :span="1">
+                    <span style="
+                    padding:20px 0px 90px 0px;
+                    margin-top: 0px;
+                    border-left: 1px solid #e3e4e6;
+                    font-size: 0;
+                    "></span>
+                                </el-col>
+
+
+                                <el-col :span="16"style="margin-top: 15px" >
+                    <span class="subtitle" >
+<!--                            <el-col  v-for='(row,rowIndex) in cc.subtitles' :key="rowIndex" :class="{on:cc.subtitles[0].length==2,off:cc.subtitles[0].length!=2}" >-->
+                        <!--                            <el-row  v-for="(column,coIndex) in row" :key="coIndex" :class="{oon:column.length==1,ooff:column.length!=1}">-->
+                        <!--                                <el-col v-for="(ccolumn,ccoIndex) in column" :span="12" :key="ccoIndex" >-->
+                        <!--                         <span style="font-weight: bold;font-size: 18px">{{ccolumn.subtitle}}:<br></span>-->
+                        <!--                        <span style="font-size: 16px">{{ccolumn.data}}<br></span>-->
+                        <!--                                </el-col>-->
+
+                        <!--                                </el-row>-->
+                        <!--                            </el-col>-->
+
+                            <el-row style="" :class="{num1:cc.subtitles.length===1,num2:cc.subtitles.length===2,num3:cc.subtitles.length===3,num4:cc.subtitles.length===4}">
+                                <el-col v-for="(ccolumn,ccoIndex) in cc.subtitles" :span="12" :key="ccoIndex" >
+                                     <span style="font-weight: bold;font-size: 18px">{{ccolumn.subtitle}}:<br></span>
+                                     <span style="font-size: 16px">{{ccolumn.data}}<br></span>
+                                </el-col>
+                            </el-row>
+
+
+                    </span>
+                                </el-col>
+                                <!--                    border: 1px solid #e3e4e6;-->
+                            </el-button >
+                        </el-card>
+                    </el-col>
+
+
+
+
+
+                </el-row>
+
+            </el-tab-pane>
+        </el-tabs>
+<!--        {{card2row}}<br><br>{{card}}<br><br>{{card2row2}}-->
+
 <!--        <el-divider>设备信息</el-divider>-->
 <div v-if="false">
         <el-row :gutter="0" type="flex" justify="center" class="row-bg2"
@@ -272,111 +369,7 @@ b
 
         </el-row>
         </div>
-<div v-if="false">
 
-        <el-divider><p style="font-size: 25px"> 设备控制</p></el-divider>
-
-
-        <el-row :gutter="0" type="flex" justify="center" class="row-bg2"
-                v-for="(row,Rindex) in card2row2"
-                :key="(Rindex+1)*2"
-        >
-            <el-col :span="5" v-for="(cc,index) in row"
-                    :key="index"
-            >
-                <el-card class="box-card4">
-                    <div  v-if="cc.title==='风扇'" style="text-align: center;font-size: 20px;">
-                        <span class="demonstration" >风扇转速</span><br>
-                        <el-switch
-                            v-model="autoOpen"
-                            active-text="手动控制"
-                            inactive-text="自动控制"
-                            inactive-color="#409EFF"
-                            @change="handleFanAuto"
-
-                        >
-                        </el-switch><br>
-                        <el-switch
-                            v-if="autoOpen"
-                            v-model="sliderOpen"
-                            active-text="开"
-                            inactive-text="关"
-                            @change="handleFanSwitch"
-
-                        >
-                        </el-switch>
-                        <el-slider v-if="andOpen" class="FanDefalut" v-model="fanSpeed" @change="handleFanSpeed" ></el-slider>
-                    </div>
-
-                    <div  v-if="cc.title==='重合闸'" style="text-align: center;font-size: 20px;">
-                        <div class="demonstration" >重合闸开关</div>
-                        <br>
-                        <el-button @click="rebootPower">重启</el-button>
-                        <el-switch
-                            v-model="powerSwitch"
-                            active-text="合闸"
-                            inactive-text="分闸"
-                            @change="handlePowerSwitch"
-                        >
-
-                        </el-switch>
-
-                    </div>
-
-                    <el-button slot="reference" class="box-card3-1"  >
-                        <el-col :span="8" style="margin-top: 15px;">
-                            <div class="title" >
-
-                                <i class="el-icon-cpu" style="color: #1c8de0;"></i>
-                                {{cc.title}}
-
-                            </div>
-                        </el-col>
-
-
-                        <el-col :span="1">
-                    <span style="
-                    padding:20px 0px 90px 0px;
-                    margin-top: 0px;
-                    border-left: 1px solid #e3e4e6;
-                    font-size: 0;
-                    "></span>
-                        </el-col>
-
-
-                        <el-col :span="16"style="margin-top: 15px" >
-                    <span class="subtitle" >
-<!--                            <el-col  v-for='(row,rowIndex) in cc.subtitles' :key="rowIndex" :class="{on:cc.subtitles[0].length==2,off:cc.subtitles[0].length!=2}" >-->
-                        <!--                            <el-row  v-for="(column,coIndex) in row" :key="coIndex" :class="{oon:column.length==1,ooff:column.length!=1}">-->
-                        <!--                                <el-col v-for="(ccolumn,ccoIndex) in column" :span="12" :key="ccoIndex" >-->
-                        <!--                         <span style="font-weight: bold;font-size: 18px">{{ccolumn.subtitle}}:<br></span>-->
-                        <!--                        <span style="font-size: 16px">{{ccolumn.data}}<br></span>-->
-                        <!--                                </el-col>-->
-
-                        <!--                                </el-row>-->
-                        <!--                            </el-col>-->
-
-                            <el-row style="" :class="{num1:cc.subtitles.length===1,num2:cc.subtitles.length===2,num3:cc.subtitles.length===3,num4:cc.subtitles.length===4}">
-                                <el-col v-for="(ccolumn,ccoIndex) in cc.subtitles" :span="12" :key="ccoIndex" >
-                                     <span style="font-weight: bold;font-size: 18px">{{ccolumn.subtitle}}:<br></span>
-                                     <span style="font-size: 16px">{{ccolumn.data}}<br></span>
-                                </el-col>
-                            </el-row>
-
-
-                    </span>
-                        </el-col>
-                        <!--                    border: 1px solid #e3e4e6;-->
-                    </el-button >
-                    </el-card>
-            </el-col>
-
-
-
-
-
-        </el-row>
-</div>
 
 
 
@@ -423,8 +416,8 @@ b
 
                 //图表数据
                 timeValue:[],
-				temperature:[[]],
-				humidity:[[]],
+				temperature:[ [ 1569245960000, 25.5 ], [ 1569245960001, 25.6 ], [ 1569245960002, 25.7 ], [ 1569245960003, 25.8 ], [ 1569245960004, 25.9 ], [ 1569245960005, 26.0 ], [ 1569245960006, 26.1 ], [ 1569245960007, 26.2 ], [ 1569245960008, 26.3 ], [ 1569245960009, 26,4 ] ],
+				humidity:[ [ 1569245960000, 25.5 ], [ 1569245960001, 25.6 ], [ 1569245960002, 25.7 ], [ 1569245960003, 25.8 ], [ 1569245960004, 25.9 ], [ 1569245960005, 26.0 ], [ 1569245960006, 26.1 ], [ 1569245960007, 26.2 ], [ 1569245960008, 26.3 ], [ 1569245960009, 26,4 ] ],
                 Tlimit:10,
                 Toffset:1,
                 // card数据
@@ -443,7 +436,8 @@ b
                 tt:0,
                 timer:'',
 				test:[],
-
+                //tab
+				tabActiveName: 'first'
 			}
         },
 
@@ -565,8 +559,7 @@ b
 				}else{
 					await fanAutoOff({device_id:this.device_id});
 				}
-            }
-
+            },
 
         },
         computed:{
@@ -647,8 +640,6 @@ b
 
         },
         mounted() {
-                console.log(this.temperature);
-
 
 			    this.device_id=this.$route.query.device_id;
 			    if(this.device_id!==null) {

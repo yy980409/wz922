@@ -62,12 +62,12 @@
 
                     </el-submenu>
                     <el-submenu index="3">
-                        <template slot="title"><i class="el-icon-folder-opened"></i><span slot="title">>设备管理</span></template>
+                        <template slot="title"><i class="el-icon-setting"></i><span slot="title">>设备管理</span></template>
                         <el-menu-item index="devices"><span slot="title">> 设备添加</span></el-menu-item>
 
                     </el-submenu>
                     <el-submenu index="4">
-                        <template slot="title"><i class="el-icon-folder-opened"></i><span slot="title">>用户管理</span></template>
+                        <template slot="title"><i class="el-icon-user-solid"></i><span slot="title">>用户管理</span></template>
                         <el-menu-item index="user"><span slot="title">> 用户信息</span></el-menu-item>
 
                     </el-submenu>

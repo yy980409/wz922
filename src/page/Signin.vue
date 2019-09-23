@@ -1,5 +1,6 @@
 <template>
   <div>
+      {{Host}}
       <el-button @click="hh"></el-button>
     <el-form :rules="rules" :model="Form" ref="Form" status-icon class="login_container" label-position="left"
              label-width="70px" v-loading="loading" >
@@ -27,6 +28,7 @@
 
 
 <script>
+  import {testUrl} from '../config/env'
   import {Message} from 'element-ui';
   import axios from 'axios';
   export default {
@@ -38,7 +40,7 @@
         } else {
           callback()
         }
-      }
+      };
 
       var checkpwd = (rule, value, callback) => {
         if(value.length<1){
@@ -46,7 +48,7 @@
         } else {
           callback()
         }
-      }
+      };
 
       var checkcode = (rule, value, callback) => {
         if(value.length<1){
@@ -54,9 +56,10 @@
         } else {
           callback()
         }
-      }
+      };
 
       return {
+      	urll:testUrl,
         Form: {
           username: '',
           password: '',
@@ -68,11 +71,26 @@
           imageCode: [{validator: checkcode, trigger: 'blur'}]
         },
         loading: false,
-        Host: "http://139.9.198.72:8082",
-        defaulturl: 'http://139.9.198.72:8082/code/image/',
-        url: 'http://139.9.198.72:8082/code/image/1'
+        // Host: "http://139.9.198.72:8082",
+        // defaulturl: 'http://139.9.198.72:8082/code/image/',
+        // url: 'http://139.9.198.72:8082/code/image/1'
+
+		//   Host: "http://172.26.35.125:8083",
+		//   defaulturl: 'http://172.26.35.125:8083/code/image/',
+		//   url: 'http://172.26.35.125:8083/code/image/1'
       }
     },
+      computed:{
+		  Host: function () {
+			  return testUrl;
+		  },
+		  defaulturl: function () {
+			  return testUrl + '/code/image/';
+		  },
+		  url: function () {
+			  return testUrl + '/code/image/1';
+		  }
+      },
       created(){
 		  axios.defaults.withCredentials = true;
       },
@@ -83,6 +101,7 @@
         param.append('username',this.Form.username)
         param.append('password',this.Form.password)
         param.append('imageCode',this.Form.imageCode)
+          console.log(param);
         axios.post(this.Host+'/login',param).then(resp => {
           this.loading = false;
           if(resp && resp.status==200){
@@ -91,7 +110,7 @@
               .push('/manage');
           }
         }).catch(err=>{
-          console.log(err)
+          console.log(err);
           this.loading = false
           Message.error({message: "验证码错误"})
         })

@@ -1,16 +1,7 @@
 <template>
     <div class="back" >
         <headTop></headTop>
-<!--        {{normalState}}{{errorState}}{{offlineState}}-->
-<!--        {{centreData}}-->
-<!--        <br><br>data1{{data1}}<br><br>data2{{data2}}-->
-
-<!--        <el-button @click="testButt">地图变</el-button>-->
-
-
-<!--        {{gridData}}<br>{{items}}<br>{{currentPageData}}-->
-<!--        {{dynamicInfo}}{{info}}<br>{{ normalState}}<br>{{errorState}}<br>{{offlineState}}-->
-<!--        <input v-model.number="testCount" type="number" step="20">-->
+{{centreData}}
         <el-row :gutter="10" style="margin:10px;">
             <el-col :span="19">
 
@@ -151,13 +142,14 @@
                             <el-card class="box-card3"  >
 
                                 <el-divider > <span style="font-size: 18px;font-weight: bold">设备状态</span></el-divider>
+                                <div v-if="seen">
                                 <el-row >
                                     <!--//左框-->
                                     <el-col :span="9" style="text-align: right;font-weight: bold">
 <!--                                        <el-row v-for="(i,index) in baseInfo.k1" :key="index">-->
 <!--                                       {{i}}-->
 <!--                                        </el-row>-->
-                                        <el-row>设备号</el-row>
+                                        <el-row >设备号</el-row>
                                         <el-row v-for="(value,name) in dynamicInfo" :key="name">
                                             {{name}}
                                         </el-row>
@@ -173,7 +165,7 @@
                                         </el-row>
                                     </el-col>
                                 </el-row>
-
+                                </div>
 
 
 
@@ -235,6 +227,7 @@
                 defaultTemp:[1],
 				defaultOpenKey:[1],
                 area:[],
+				areaData:[],
 				defaultProps: {
 					children: 'children',
 					label: 'label'
@@ -292,12 +285,13 @@
 					k1:["设备号","温度","湿度","重合闸状态","防雷器状态","水浸状态"],
                     k2:["",""," ","","",""]
                 },
-                dynamicInfo:{"":""},
+                dynamicInfo:{},
                 //test
                 ii:0,
 				errorFrameTimer:"",
                 timer:"",
 				myChart:null,
+                //mapFrame
                 mapFrameId:'',
                 mapFramecontent:'Loading',
             }
@@ -314,9 +308,6 @@
 			}
 			this.myChart = echarts.init(document.getElementById('map1'));
 			this.initData(this.myChart);
-
-
-
 		},
 		methods: {
 			testButt(){
@@ -460,7 +451,6 @@
 				})
 			},
 			async initData(chart){////////初始化图表
-                let ii=1;
 				await this.getGPSs();
 				var self=this;
 				chart.setOption({
@@ -649,9 +639,10 @@
 								return res;
                             }
                             if(self.mapFrameId!==params.name) {
+								self.mapFrameId=params.name;
 								getDevSensors({device_id: params.name}).then(Promise => {
 									// console.log(Promise.sensors);
-									console.log(params);
+									// console.log('变');
 									let left = '<div style="text-align: right" class="left"><div>设备号: </div><div>状态: </div>';
 									let right = '<div class="right"><div>' + params.name + '</div><div>' + params.seriesName + '</div>';
 
@@ -667,7 +658,7 @@
 									//回调函数更新框内信息
 									callback(ticket, res);
 									self.mapFramecontent=res;
-									self.mapFrameId=params.name;
+
 								});
                             }
 
@@ -756,14 +747,15 @@
 					]
 				});
 				this.myChart.on('click', this.butt);
-
-				//数据更新
+				//设备列表分区数据
+				this.convertAreaData();
+				//数据更新计时器
 				this.timer=setInterval(this.updateData, 5000);
 			},
 			async initialData(){
 				console.log("数据初始化");
 				//分区初始化
-				await this.getAreas();
+				this.getAreas();
 				//故障框
                 this.getError();
 				//设备总信息
@@ -848,23 +840,16 @@
                 }
 				return res;
             },
-            async getListData(devId){//baseInfo无用 旧方案
-                const temp=[];
-                const TH=await getLatesTemById({device_id:devId});
-                const power=await getLatestPowerById({device_id:devId});
-				const water=await getLatestWaterById({device_id:devId});
+            async getListData(devId){
+				let ff=this.info.find((ele) => (ele.device_id.toString()===devId));
+				if(ff.status==='离线'){
+					let temp={'状态':'离线'};
+					this.dynamicInfo=temp;
+                    return ;
+                }
                 const sensors=await getDevSensors({device_id:devId});
-                console.log(ttemp);
                 const ttemp=sensors.sensors;
                 this.dynamicInfo=ttemp;
-				temp[0]=devId;
-				temp[1]=TH.temperature+" "+"℃";
-				temp[2]=TH.humidity+" "+"%RH";
-				temp[3]=power.sta_H;
-				// temp[4]
-				temp[5]=water.status;
-				this.baseInfo.k2=temp;
-
             },
 			handleCurrentChange: function (val) {
 				this.currentPage = val;
@@ -874,7 +859,23 @@
 					this.currentPageData[i] = this.gridData[(val-1) * this.pageSize + i];
 				}
 			},
+			convertAreaData:function(){
+				let temp=[];
+				for(let i=0;i<this.area.length;i++){
+					let obj = {};
+					obj.label=this.area[i].area_name;
+					obj.id=i+1;
+					obj.children=[];
+					this.info.forEach(item => {
+						if(item.area===obj.label){
+							obj.children.push({label:item.device_id});
+						}
+					});
 
+					temp.push(obj);
+				}
+				this.areaData = temp;
+			},
 		},
 		watch: {
 			defaultTemp(newval,oldval) {
@@ -936,18 +937,6 @@
 					this.getListData(newval);
                 }
             },
-			// items:function(){//////////////????????????????????????????未完成
-			//     if(items.length>1){
-			// 		this.errorFrameTimer=setInterval(this.scroll,3100);
-            //
-            //     }else{
-			// 		clearInterval(this.errorFrameTimer);
-			// 		console.log("destroyed");
-			//     	if(items.length===0){
-			//     		this.items={name:"无",area:"无",error:" 无 "};
-            //         }
-            //     }
-            // },
 			$route:function(val,oldval){//切换页面//////////////????????????????????????????未完成
 				const currentPath=val.path.replace('/', '');
 				const oldPath =oldval.path.replace('/', '');
@@ -955,7 +944,8 @@
 				if(currentPath !== "HomeMap" && oldPath === "HomeMap") {
 
 					clearInterval(this.errorFrameTimer);
-					console.log("Home errorFrameTimer destroyed");
+					clearInterval(this.timer);
+					console.log("Home AllTimer destroyed");
 
 				}
 				if(currentPath === "HomeMap" && oldPath !== "HomeMap")
@@ -995,24 +985,6 @@
 				});
 				return this.convert(temp);
 			},
-			//分区
-			areaData:function(){
-			    let temp=[];
-                for(let i=0;i<this.area.length;i++){
-                    let obj = {};
-                    obj.label=this.area[i].area_name;
-                    obj.id=i+1;
-					obj.children=[];
-                    this.info.forEach(item => {
-                    	if(item.area===obj.label){
-							obj.children.push({label:item.device_id});
-                        }
-                    });
-
-                    temp.push(obj);
-                }
-                return temp;
-            },
 			////////////动画组
 			animatedOfflineNum  : function() {
 				return this.tweenedOfflineNum.toFixed(0);
@@ -1034,9 +1006,6 @@
 			defaultActive: function(){
 				return this.current_id+"";
 			},
-            addString:function(){
-				return "设备"+this.current_id;
-            },
 
 			badgeValue:function(){
 				if(this.gridData.length){
@@ -1061,6 +1030,7 @@
 		},
 		beforeDestroy() {
 			clearInterval(this.errorFrameTimer);
+			clearInterval(this.timer);
 			console.log("finally destroyed");
 		}
 
@@ -1146,6 +1116,7 @@
     }
     .box-card1{
         background-color: #1e9fff;
+        /*background: linear-gradient(to right,#1e9fff, #d0aeff);*/
         color: #ffffff;
         border-radius: 8px;
         height: 100px;
@@ -1162,7 +1133,8 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)
     }
     .box-button{
-        background-color: #ff5722;
+        /*background-color: #ff5722;*/
+        background: linear-gradient(to right,#ff5722, #ff9357);
         color: #ffffff;
         border-radius: 8px;
         height: 100px;
