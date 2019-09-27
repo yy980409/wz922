@@ -59,17 +59,18 @@
                     <el-submenu index="2">
                         <template slot="title"><i class="el-icon-folder-opened"></i><span slot="title">>数据中心</span></template>
                         <el-menu-item index="tempearatureHumidity"><span slot="title">> 环境数据</span></el-menu-item>
+                        <el-menu-item index="pm25Luminance"><span slot="title">> 气象数据</span></el-menu-item>
 
                     </el-submenu>
-                    <el-submenu index="3">
+
+                    <el-submenu index="3" v-if="submenuShow">
                         <template slot="title"><i class="el-icon-setting"></i><span slot="title">>设备管理</span></template>
                         <el-menu-item index="devices"><span slot="title">> 设备添加</span></el-menu-item>
 
                     </el-submenu>
-                    <el-submenu index="4">
+                    <el-submenu index="4" v-if="submenuShow">
                         <template slot="title"><i class="el-icon-user-solid"></i><span slot="title">>用户管理</span></template>
                         <el-menu-item index="user"><span slot="title">> 用户信息</span></el-menu-item>
-
                     </el-submenu>
 
                 </el-menu>
@@ -118,26 +119,11 @@
 		computed: {
 			defaultActive: function(){
 				return this.$route.path.replace('/', '');
-			}
+			},
+			submenuShow : function(){
+				return this.$store.state.user.role === 'ROLE_admin';
+            }
 		},
-        watch:{
-    	// 'x':function(val){
-    	// 	var i=(this.x/document.body.scrollWidth)*100;
-    	// 	if(i<=5){
-	    //         this.arrival=1;
-	    //         this.show3=true;
-		// 		this.isCollapse=false;
-        //
-    	// 	}
-    	// 	else{
-    	// 		this.arrival=0;
-		// 		this.show3=false;
-		// 		this.isCollapse=true;
-		// 		;
-    	// 	}
-        //
-        // }
-        },
 		components: {
 			headTop,
 		},

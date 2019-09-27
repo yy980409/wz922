@@ -1,9 +1,26 @@
 import {testUrl} from './env'
 import axios from 'axios'
 
-export default async (url = '',data={}) => {
+export default async (url = '',data={},type = '') => {
     url = testUrl + url;
 
+    //POST
+    if(type==='post'){
+        let json=null;
+        await axios
+            .post(url,data)
+            .then(function (response){
+                json=response.data;
+            });
+        return json;
+    }
+
+
+
+
+
+
+    //GET
     if (data!=={}) {
         let dataStr = ''; //数据拼接字符串
         Object.keys(data).forEach(key => {
@@ -15,12 +32,7 @@ export default async (url = '',data={}) => {
             url = url + '/' + dataStr;
         }
     }
-    // console.log(url);
-
-
-
-
-    axios.defaults.withCredentials = true
+    // axios.defaults.withCredentials = true
 
     var json=null;
     await axios

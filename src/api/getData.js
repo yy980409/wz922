@@ -1,6 +1,17 @@
 import fetch from '@/config/fetch'
 import axios from '@/config/axios'
 
+/**
+ * 数据中心接口
+ */
+export const postTemHumLatest = data =>(axios('/device/temperature_and_humidity/latest',data,'post'));
+export const postTemHumHistory = data =>(axios('/device/temperature_and_humidity/query',data,'post'));
+export const postPMLumLatest = data =>(axios('/device/airLight/latest',data,'post'));
+export const postPMLumHistory = data =>(axios('/device/airLight/query',data,'post'));
+
+/**
+ * 风扇控制
+ */
 export const fanAutoOn = data =>(axios('/device/remoteControl/fan/autoControlOn',data));
 export const fanAutoOff = data =>(axios('/device/remoteControl/fan/autoControlOff',data));
 export const fanSpeed = data =>(axios('/device/remoteControl/fanSpeed',data));
@@ -21,8 +32,8 @@ export const getDevSensors = data =>(axios('/device/sensors',data));
 /**
  * 获取设备GPS、分区
  */
-export const getGPS = data =>(axios('/device/location',data));
-export const getGPSByArea  = data =>(axios('/device/location',data));
+export const getGPS = data =>(axios('/device/area/location',data));
+export const getGPSByArea  = data =>(axios('/device/area/location',data));
 export const getArea = data =>(axios('/device/area',data));
 /**
  * 获取设备重合闸

@@ -15,9 +15,9 @@ let fuckUrl = '';
 if (process.env.NODE_ENV == 'development') {
 	baseUrl = '';
     baseImgPath = '/img/';
-    testUrl = "http://1391.9.198.72:8082";
-    // testUrl = "http://192.168.56.55:8082";
-    // testUrl = 'http://172.26.35.125:8083';
+    // testUrl = "http://139.9.198.72:8082";
+    // testUrl = "http://192.168.56.97:8082";
+     testUrl = 'http://172.29.104.12:8083';
 
 }else{
 	baseUrl = '//elm.cangdu.org';

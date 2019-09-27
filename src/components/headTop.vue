@@ -1,6 +1,7 @@
 <template>
     <div class="header_container" >
-<!--        {{count}}-->
+<!--        {{this.$store.state.user}}-->
+        <el-button @click="hh">退出</el-button>
         <el-button v-if="ok" type="primary" plain @click="back" style="margin-right: 15px">返回</el-button>
         <img :src="imgUrl" style="width:30px;" alt="">
         <p style="margin:15px;font-size: 25px;color:#1d90e6;">银翔科技智能运维平台</p>
@@ -40,18 +41,22 @@
     	},
 		props: ['ok'],
 		methods: {
+			hh:function () {
+				this.$store.dispatch('logout');
+			},
 			...mapActions(['getAdminData']),
 			async handleCommand(command) {
 				if (command == 'home') {
 					this.$router.push('/manage');
 				}else if(command == 'signout'){
-					const res = await signout()
+
+					// const res = await signout()
 					if (res.status == 1) {
 						this.$message({
 	                        type: 'success',
 	                        message: '退出成功'
 	                    });
-	                    this.$router.push('/');
+						this.$store.dispatch('logout');
 					}else{
 						this.$message({
 	                        type: 'error',

@@ -1,7 +1,5 @@
 <template>
   <div>
-      {{Host}}
-      <el-button @click="hh"></el-button>
     <el-form :rules="rules" :model="Form" ref="Form" status-icon class="login_container" label-position="left"
              label-width="70px" v-loading="loading" >
       <h3 class="login_title">用户登录</h3>
@@ -15,7 +13,7 @@
       </el-form-item>
       <el-form-item label=""></el-form-item>
       <el-form-item label="验证码" prop="imageCode">
-        <el-input v-model="Form.imageCode"  auto-complete="off" style="width: 150px; float: left"  ></el-input>
+        <el-input v-model="Form.imageCode"  @keyup.enter.native="submit" auto-complete="off" style="width: 150px; float: left"  ></el-input>
         <el-image  style="width: 120px; height: 40px"
                    :src="url" session="false" @click="refresh"></el-image>
       </el-form-item>
@@ -30,6 +28,7 @@
 <script>
   import {testUrl} from '../config/env'
   import {Message} from 'element-ui';
+  import {mapActions, mapState} from 'vuex'
   import axios from 'axios';
   export default {
 
@@ -71,13 +70,7 @@
           imageCode: [{validator: checkcode, trigger: 'blur'}]
         },
         loading: false,
-        // Host: "http://139.9.198.72:8082",
-        // defaulturl: 'http://139.9.198.72:8082/code/image/',
-        // url: 'http://139.9.198.72:8082/code/image/1'
-
-		//   Host: "http://172.26.35.125:8083",
-		//   defaulturl: 'http://172.26.35.125:8083/code/image/',
-		//   url: 'http://172.26.35.125:8083/code/image/1'
+        random:1,
       }
     },
       computed:{
@@ -87,12 +80,9 @@
 		  defaulturl: function () {
 			  return testUrl + '/code/image/';
 		  },
-		  url: function () {
-			  return testUrl + '/code/image/1';
+		  url:function () {
+			  return testUrl + '/code/image/' + this.random;
 		  }
-      },
-      created(){
-		  axios.defaults.withCredentials = true;
       },
     methods: {
       submit: function () {
@@ -105,21 +95,31 @@
         axios.post(this.Host+'/login',param).then(resp => {
           this.loading = false;
           if(resp && resp.status==200){
-            console.log(resp)
-            this.$router
-              .push('/manage');
+            console.log(resp);
+			this.$store.commit('login', resp.data.msg);
+            this.$router.push('manage');
           }
         }).catch(err=>{
           console.log(err);
-          this.loading = false
-          Message.error({message: "验证码错误"})
+          this.loading = false;
+          Message.error({message: "验证码错误"});
         })
       },
       refresh: function (){
-        this.url = this.defaulturl + Math.random()
+        // this.url = this.defaulturl + Math.random()
+		  this.random = Math.random();
       },
+        ////////////test
         hh:function () {
+			this.$store.commit('increment');
+		},
+		hh2:function () {
+			this.$store.commit('clear');
+
+		},
+		hh3:function () {
 			this.$router.push('manage');
+
 		}
     }
   }

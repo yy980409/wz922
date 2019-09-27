@@ -232,7 +232,7 @@
       loaddevices(){
         var _this = this;
         _this.tableloading = true;
-        console.log(testUrl+"/basic/devices?page="+this.currentpage+"&size=10&keywords="+this.keywords);
+        console.log(testUrl+"/basic/devices?page="+this.currentpage+"&size=10&keywords= "+this.keywords);
         axios.get(testUrl+"/basic/devices?page="+this.currentpage+"&size=10&keywords="+this.keywords).then(resp => {
           if(resp && resp.status==200){
             console.log(resp)

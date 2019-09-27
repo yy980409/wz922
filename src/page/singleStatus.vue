@@ -1,7 +1,6 @@
 <template>
     <div class="fillcontain" style="background-color: #f4f5f7;;min-height: 1000px">
         <head-top ok="true" :count="tt"></head-top>
-{{temperature}}
         <el-tabs v-model="tabActiveName"  type="border-card" >
 
             <el-tab-pane label="设备信息" name="first" style="min-height: 850px">
@@ -157,7 +156,7 @@ b
                 </el-row>
             </el-tab-pane>
 
-            <el-tab-pane label="设备控制" name="second" style="min-height: 850px">
+            <el-tab-pane label="设备控制" name="second" style="min-height: 850px" :disabled="!roleShow">
                 <el-divider><p style="font-size: 25px;color: #a9a9ab "> 设备控制</p></el-divider>
 
                 <el-row :gutter="0" type="flex" justify="center" class="row-bg2"
@@ -416,8 +415,8 @@ b
 
                 //图表数据
                 timeValue:[],
-				temperature:[ [ 1569245960000, 25.5 ], [ 1569245960001, 25.6 ], [ 1569245960002, 25.7 ], [ 1569245960003, 25.8 ], [ 1569245960004, 25.9 ], [ 1569245960005, 26.0 ], [ 1569245960006, 26.1 ], [ 1569245960007, 26.2 ], [ 1569245960008, 26.3 ], [ 1569245960009, 26,4 ] ],
-				humidity:[ [ 1569245960000, 25.5 ], [ 1569245960001, 25.6 ], [ 1569245960002, 25.7 ], [ 1569245960003, 25.8 ], [ 1569245960004, 25.9 ], [ 1569245960005, 26.0 ], [ 1569245960006, 26.1 ], [ 1569245960007, 26.2 ], [ 1569245960008, 26.3 ], [ 1569245960009, 26,4 ] ],
+				temperature:[ [ 1569245960000, 25.5 ], [ 1569245960001, 25.6 ], [ 1569245960002, 25.7 ], [ 1569245960003, 25.8 ], [ 1569245960004, 25.9 ], [ 1569245960005, 26.0 ], [ 1569245960006, 26.1 ], [ 1569245960007, 26.2 ], [ 1569245960008, 26.3 ], [ 1569245960009, 26.4 ] ],
+				humidity:[ [ 1569245960000, 25.5 ], [ 1569245960001, 25.6 ], [ 1569245960002, 25.7 ], [ 1569245960003, 25.8 ], [ 1569245960004, 25.9 ], [ 1569245960005, 26.0 ], [ 1569245960006, 26.1 ], [ 1569245960007, 26.2 ], [ 1569245960008, 26.3 ], [ 1569245960009, 26.4 ] ],
                 Tlimit:10,
                 Toffset:1,
                 // card数据
@@ -563,6 +562,9 @@ b
 
         },
         computed:{
+			roleShow:function(){
+			    return this.$store.state.user.role === ('ROLE_admin' || 'ROLE_controller');
+            },
 			card2row:function(){
 				const uu=this.card;
 				const column=4;
@@ -647,16 +649,7 @@ b
 				}
 			},
         watch:{
-			// '$route.query.device_id':function(val){//切换页面
-			// 	if(val!==undefined) {
-			// 		this.initData();
-			// 	}else
-            //     {
-			// 		clearInterval(this.timer);
-			// 		console.log("destroyed");
-            //     }
-            // },
-			$route:function(val,oldval){//切换页面//////////////????????????????????????????未完成
+			$route:function(val,oldval){//切换页面//////////////?
 				const currentPath=val.path.replace('/', '');
 				const oldPath =oldval.path.replace('/', '');
 				if(currentPath !== "singleStatus" && oldPath === "singleStatus") {
