@@ -214,6 +214,7 @@
 	import 'echarts/lib/component/title';
 	import 'echarts/extension/bmap/bmap'
 	import {getGPSByArea} from "../api/getData";
+     let myChart=null;
 	export default {
 		components:{
 			headTop
@@ -290,7 +291,7 @@
                 ii:0,
 				errorFrameTimer:"",
                 timer:"",
-				myChart:null,
+				// myChart:null,
                 //mapFrame
                 mapFrameId:'',
                 mapFramecontent:'Loading',
@@ -418,7 +419,7 @@
 				}
 			},
             updateData(){
-				// console.log("DataUpdated");
+				console.log("DataUpdated");
 				this.updateError();
 				this.getTotalInfo();
 				this.getGPSs();
