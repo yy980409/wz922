@@ -1,7 +1,8 @@
 <template>
   <div>
-    <el-container>
-      <el-header style="height: 80px; width:1000px">
+      <head-top></head-top>
+    <el-container style="margin-top: 20px">
+      <el-header style="height: 60px; width:1000px;">
         <div style="display: inline">
           <el-button round type="primary"  icon="el-icon-plus" style="float:left" @click="addmeun"> 添加设备</el-button>
           <el-button type="primary" icon="el-icon-search" style="float: right;" @click="search">搜索</el-button>
@@ -194,9 +195,11 @@
 </template>
 
 <script>
+	import headTop from '../components/headTop';
 	import {testUrl} from '../config/env'
 	import axios from 'axios';
   export default {
+  	components:{headTop},
     data(){
       var validatePass= (rule,value,callback) => {
         if(isNaN(value)){
@@ -204,7 +207,8 @@
         }
       }
       return{
-        Host: 'http://172.26.199.19:8080',
+        //Host: 'http://172.26.199.19:8080',
+		  Host: 'http://139.9.198.72:8082',
         keywords: '',
         devices: [],
         types: [],

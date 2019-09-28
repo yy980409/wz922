@@ -1,7 +1,7 @@
 <template>
     <div class="back" >
         <headTop></headTop>
-{{centreData}}
+<!--{{centreData}}-->
         <el-row :gutter="10" style="margin:10px;">
             <el-col :span="19">
 

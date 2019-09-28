@@ -2,12 +2,18 @@ import fetch from '@/config/fetch'
 import axios from '@/config/axios'
 
 /**
+ * 登出
+ */
+export const logOut = data =>(axios('/logout',data));
+/**
  * 数据中心接口
  */
 export const postTemHumLatest = data =>(axios('/device/temperature_and_humidity/latest',data,'post'));
 export const postTemHumHistory = data =>(axios('/device/temperature_and_humidity/query',data,'post'));
 export const postPMLumLatest = data =>(axios('/device/airLight/latest',data,'post'));
 export const postPMLumHistory = data =>(axios('/device/airLight/query',data,'post'));
+export const postRecloseLatest = data =>(axios('/device/auto_reclosing_power_protector/latest',data,'post'));
+export const postRecloseHistory = data =>(axios('/device/auto_reclosing_power_protector/query',data,'post'));
 
 /**
  * 风扇控制

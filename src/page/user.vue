@@ -1,6 +1,7 @@
 <template>
     <div>
-        <el-container>
+        <head-top></head-top>
+        <el-container style="margin-top: 20px">
             <el-header style="height: 60px; width:1000px">
                 <div style="display: inline">
                     <el-button round type="primary"  icon="el-icon-plus" style="float:left" @click="addmeun"> 添加账户</el-button>
@@ -10,7 +11,7 @@
 
                 </div>
             </el-header>
-            <el-main style="height: 600px">
+            <el-main style="height: 100%">
 
                 <el-table :data="users" v-loading="tableloading" border stripe
                           size="mini" style="width: 100%">
@@ -130,7 +131,7 @@
                             <div>
                                 <el-form-item label="角色:" label-width="120px" label-position="right">
                                     <el-radio-group v-model="selectroles">
-                                        <el-radio border v-for="role in roles" :label="role" :key="role">{{ role }}</el-radio>
+                                        <el-radio border v-for="role in roles" v-if="$store.state.user.name == 'super'?true:(role == '管理员'?false:true) " :label="role" :key="role">{{ role }}</el-radio>
                                     </el-radio-group>
                                 </el-form-item>
                             </div>
@@ -169,7 +170,7 @@
                     <el-main>
                         <div>
                             <el-radio-group v-model="selectroles">
-                                <el-radio border v-for="role in roles" :label="role" :key="role">{{ role }}</el-radio>
+                                <el-radio border v-for="role in roles" v-if="$store.state.user.name == 'super'?true:(role == '管理员'?false:true)" :label="role" :key="role">{{ role }}</el-radio>
                             </el-radio-group>
                         </div>
                     </el-main>
@@ -181,7 +182,7 @@
                     </el-header>
                     <el-main>
                         <div>
-                            <el-checkbox-group v-model="selectareas" :min="1">
+                            <el-checkbox-group v-model="selectareas">
                                 <el-checkbox border v-for="area in areas" :label="area" :key="area"></el-checkbox>
                             </el-checkbox-group>
                         </div>
@@ -199,11 +200,15 @@
 
 <script>
 	import search from '../components/Search.vue'
+	import headTop from '../components/headTop';
+	import {testUrl} from '../config/env'
+	import {Message} from 'element-ui';
 	export default {
 		data(){
 			return{
-				//Host: 'http://139.9.198.72:8082',
-				Host: 'http://172.29.104.12:8083',
+				// Host: 'http://139.9.198.72:8082',
+				//Host: 'http://172.26.209.58:8082',
+				Host: testUrl,
 				tableloading: false,
 				currentpage: 1,
 				searchcurrentpage: 1,
@@ -232,7 +237,7 @@
 			}
 		},
 		components:{
-			search,
+			search,headTop
 		},
 		mounted:function () {
 			this.loadusers();
@@ -301,11 +306,25 @@
 			addmeun(){
 				var _this = this;
 				_this.editTitle = "添加账户";
+				_this.selectareas = []
+                _this.selectroles = ''
 				_this.clearuser();
 				_this.addVisible = true;
 			},
 			addsubmit(){
 				var _this = this;
+				if (_this.user.username == ''){
+                    Message.error("请输入账户")
+                    return
+                }
+				if (_this.selectroles == ''){
+					Message.error("请选择角色")
+					return
+				}
+				if (_this.selectareas.length == 0 ){
+					Message.error("请选择至少一个区域")
+					return
+				}
 				_this.tableloading = true;
 				_this.addVisible = false;
 				let param = new URLSearchParams();
@@ -383,8 +402,11 @@
 				})
 			},
 			showpower(row){
+
 				var _this = this;
 				_this.editTitle="权限分配"
+                this.selectroles = ''
+                this.selectareas = []
                 this.selectroles = row.roles[0].nameZh
                 for(let each in row.areaname){
                 	this.selectareas.push(row.areaname[each])
@@ -403,6 +425,10 @@
 			},
 			submitpower(){
 				var _this = this;
+				if (_this.selectareas.length == 0 ){
+					Message.error("请选择至少一个区域")
+					return
+				}
 				_this.powerVisible = false;
 				let param = new URLSearchParams();
 				param.append('rolename',_this.selectroles)

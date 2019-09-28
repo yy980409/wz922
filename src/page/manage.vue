@@ -60,15 +60,17 @@
                         <template slot="title"><i class="el-icon-folder-opened"></i><span slot="title">>数据中心</span></template>
                         <el-menu-item index="tempearatureHumidity"><span slot="title">> 环境数据</span></el-menu-item>
                         <el-menu-item index="pm25Luminance"><span slot="title">> 气象数据</span></el-menu-item>
+                        <el-menu-item index="reclose"><span slot="title">> 电源数据</span></el-menu-item>
 
                     </el-submenu>
 
-                    <el-submenu index="3" v-if="submenuShow">
+                    <el-submenu index="3" v-if="controllerShow">
                         <template slot="title"><i class="el-icon-setting"></i><span slot="title">>设备管理</span></template>
-                        <el-menu-item index="devices"><span slot="title">> 设备添加</span></el-menu-item>
+                        <el-menu-item index="devices" v-if="adminShow"><span slot="title" >> 设备添加</span></el-menu-item>
+                        <el-menu-item index="deviceControl" ><span slot="title" >> 设备批量控制</span></el-menu-item>
 
                     </el-submenu>
-                    <el-submenu index="4" v-if="submenuShow">
+                    <el-submenu index="4" v-if="adminShow">
                         <template slot="title"><i class="el-icon-user-solid"></i><span slot="title">>用户管理</span></template>
                         <el-menu-item index="user"><span slot="title">> 用户信息</span></el-menu-item>
                     </el-submenu>
@@ -120,9 +122,12 @@
 			defaultActive: function(){
 				return this.$route.path.replace('/', '');
 			},
-			submenuShow : function(){
+			adminShow : function(){
 				return this.$store.state.user.role === 'ROLE_admin';
-            }
+            },
+            controllerShow : function () {
+		        return this.$store.state.user.role === 'ROLE_controller'||this.$store.state.user.role === 'ROLE_admin';
+			}
 		},
 		components: {
 			headTop,

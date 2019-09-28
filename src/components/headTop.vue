@@ -1,7 +1,7 @@
 <template>
     <div class="header_container" >
 <!--        {{this.$store.state.user}}-->
-        <el-button @click="hh">退出</el-button>
+<!--        <el-button @click="hh">退出</el-button>-->
         <el-button v-if="ok" type="primary" plain @click="back" style="margin-right: 15px">返回</el-button>
         <img :src="imgUrl" style="width:30px;" alt="">
         <p style="margin:15px;font-size: 25px;color:#1d90e6;">银翔科技智能运维平台</p>
@@ -20,7 +20,7 @@
 </template>
 
 <script>
-	import {signout} from '@/api/getData'
+	import {signout,logOut} from '@/api/getData'
 	import {baseImgPath} from '@/config/env'
 	import {mapActions, mapState} from 'vuex'
     export default {
@@ -51,7 +51,9 @@
 				}else if(command == 'signout'){
 
 					// const res = await signout()
-					if (res.status == 1) {
+                    const res = await logOut();
+                    console.log(res);
+					if (res.status == 203) {
 						this.$message({
 	                        type: 'success',
 	                        message: '退出成功'
@@ -63,6 +65,8 @@
 	                        message: res.message
 	                    });
 					}
+
+
 				}
 			},
 			back(){

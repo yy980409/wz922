@@ -689,10 +689,10 @@ b
     }
     .num3{
         margin-left: 15px;
-        margin-top: -25px;
+        margin-top: -30px;
     }
     .num4{
-        margin-top: -20px;
+        margin-top: -30px;
     }
     .on{
         margin-top: -15px;
