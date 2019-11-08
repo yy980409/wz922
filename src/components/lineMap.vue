@@ -69,20 +69,20 @@
 						areaStyle: {
 
 							normal: {
-								// color:'#1d90e6',
-								color: {
-									type: 'linear',
-									x: 0,
-									y: 0,
-									x2: 1,
-									y2: 0,
-									colorStops: [{
-										offset: 0, color: '#1d90e6'  // 0% 处的颜色
-									}, {
-										offset: 1, color: '#57dde6' // 100% 处的颜色
-									}],
-									global: false // 缺省为 false
-								},
+								color:'#1d90e6',
+								// color: {
+								// 	type: 'linear',
+								// 	x: 0,
+								// 	y: 0,
+								// 	x2: 1,
+								// 	y2: 0,
+								// 	colorStops: [{
+								// 		offset: 0, color: '#1d90e6'  // 0% 处的颜色
+								// 	}, {
+								// 		offset: 1, color: '#57dde6' // 100% 处的颜色
+								// 	}],
+								// 	global: false // 缺省为 false
+								// },
                                 shadowColor: 'rgba(0, 0, 0, 0.5)',
 								shadowBlur: 10},
 						},

@@ -5,7 +5,7 @@
     <inspection_tool class="HtmlUnknownTag" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="38">
+          <list size="44">
             <item index="0" class="java.lang.String" itemvalue="nobr" />
             <item index="1" class="java.lang.String" itemvalue="noembed" />
             <item index="2" class="java.lang.String" itemvalue="comment" />
@@ -44,6 +44,12 @@
             <item index="35" class="java.lang.String" itemvalue="el-breadcrumb-item" />
             <item index="36" class="java.lang.String" itemvalue="el-tabs" />
             <item index="37" class="java.lang.String" itemvalue="el-tab-pane" />
+            <item index="38" class="java.lang.String" itemvalue="transition-group" />
+            <item index="39" class="java.lang.String" itemvalue="el-checkbox-group" />
+            <item index="40" class="java.lang.String" itemvalue="el-checkbox" />
+            <item index="41" class="java.lang.String" itemvalue="baidu-map" />
+            <item index="42" class="java.lang.String" itemvalue="el-tree" />
+            <item index="43" class="java.lang.String" itemvalue="el-switch" />
           </list>
         </value>
       </option>

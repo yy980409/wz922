@@ -10,8 +10,10 @@
     <br>
     <div>
       <el-row style="margin-left: 50px">
-          <el-button type="primary" @click="choose" >选择搜索字段</el-button>
-          <el-button type="primary" @click="reset">重置</el-button>
+          <el-button type="primary" @click="$emit('commitSearch')">执行高级搜索 </el-button>
+          <el-button  @click="choose" >选择搜索字段</el-button>
+          <el-button  @click="reset">重置</el-button>
+          <el-button  type="text" @click="$emit('searchSwitch')">[ 关闭高级搜索 ]</el-button>
       </el-row>
     </div>
     <div>
@@ -37,15 +39,15 @@
 <script>
   import Select from './Select.vue'
   export default {
-    props:{
-      lines:{
-        type: Array,
-        required: true
-      },
-      device:{
-        type: String,
-      }
-    },
+	  props: {
+		  lines: {
+			  type: Array,
+			  required: true
+		  },
+		  device: {
+			  type: String,
+		  },
+	  },
     data(){
       return {
         temp: '',

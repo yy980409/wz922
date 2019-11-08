@@ -1,6 +1,6 @@
 <template>
   <div>
-      <el-form :inline="true"  class="demo-form-inline">
+      <el-form :inline="true"  class="demo-form-inline" @submit.native.prevent>
           <el-form-item :label=name>
               <el-input v-model="content" placeholder="等于"></el-input>
           </el-form-item>

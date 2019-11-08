@@ -1,7 +1,6 @@
 <template>
     <div class="back" >
         <headTop></headTop>
-<!--{{centreData}}-->
         <el-row :gutter="10" style="margin:10px;">
             <el-col :span="19">
 
@@ -11,18 +10,26 @@
                     </el-col>
                     <el-col :span="22" >
                         <el-row >
-                            <el-col :span="6" ><span class="aa">设备总数</span></el-col>
-                            <el-col :span="6" ><span class="aa">离线设备数</span></el-col>
-                            <el-col :span="6" ><span class="aa">故障设备数</span></el-col>
-                            <el-col :span="6" ><span class="aa">传感器数据</span></el-col>
+                            <el-col :span="4" ><span class="aa">设备总数</span></el-col>
+                            <el-col :span="4" ><span class="aa">在线设备数</span></el-col>
+                            <el-col :span="4" ><span class="aa">离线设备数</span></el-col>
+                            <el-col :span="4" ><span class="aa">故障设备数</span></el-col>
+                            <el-col :span="8" ><span class="aa">传感器数据</span></el-col>
                         </el-row>
                         <el-row :span="22">
-<!--                            <el-col :span="7" ><span class="bb">3<p>{{ animatedNumber }}</p></span></el-col>-->
-                            <el-col :span="6" ><span class="bb"><p>{{animatedTotalNumber}}</p></span></el-col>
-                            <el-col :span="6" ><span class="bb">{{animatedOfflineNum}}</span></el-col>
-
-                            <el-col :span="6" ><span class="bb">{{animatedErrNum}}</span></el-col>
-                            <el-col :span="6" ><span class="bb">{{animatedTotalData}}</span></el-col>
+                            <el-col :span="4" ><span class="bb">
+                                <animated-number :number="normalState.length+offlineState.length+errorState.length" :time="1.5"></animated-number>
+                            </span></el-col>
+                            <el-col :span="4" ><span class="bb">
+                                     <animated-number :number="normalState.length" :time="1.5"></animated-number>
+                            </span></el-col>
+                            <el-col :span="4" ><span class="bb">
+                                     <animated-number :number="offlineState.length" :time="1.5"></animated-number>
+                            </span></el-col>
+                            <el-col :span="4" ><span class="bb">
+                                     <animated-number :number="errorState.length" :time="1.5"></animated-number>
+                            </span></el-col>
+                             <el-col :span="8" ><span class="bb">{{animatedTotalData}}</span></el-col>
 
                         </el-row>
                     </el-col>
@@ -71,11 +78,6 @@
                                 <div class="fade" v-if="badgeSeen">
                                     <p class="pp" >设备无异常</p>
                                 </div>
-<!--                                <ul id="con1" ref="con1" :class="{anim:animate===true}" >-->
-<!--                                    <li v-for='item in items'>-->
-<!--                                        {{item.area}}设备 {{item.name}} {{item.error}}-->
-<!--                                    </li>-->
-<!--                                </ul>-->
 
                             </el-col>
                         </el-button>
@@ -85,35 +87,39 @@
             </el-col>
         </el-row>
 
-
     <el-row :gutter="20" style="margin:10px">
         <el-col :span="4">
             <el-container >
                 <el-header height="30px" >设备列表</el-header>
                 <el-main >
 
-                    <el-scrollbar class="default-scrollbar" wrap-class="default-scrollbar__wrap" view-class="default-scrollbar__view">
-                        <el-form :inline="true"  :model="formInline" class="demo-form-inline" >
+                    <el-scrollbar class="default-scrollbar" wrap-class="default-scrollbar__wrap" view-class="default-scrollbar__view" :native="false" :onresize="true">
+                        <el-form :inline="true"  :model="formInline" class="demo-form-inline" @submit.native.prevent >
                             <el-form-item >
-                                <el-input v-model="formInline.device_id" placeholder="设备号"@keyup.enter.native="onSubmit"style="width:150px;margin-top: 10px;margin-left: 10px" ></el-input>
+                                <el-input v-model="formInline.device_id" placeholder="设备号" @keyup.enter.native="onSubmit" style="width:150px;margin-top: 10px;margin-left: 10px" ></el-input>
                             </el-form-item>
                             <el-form-item>
                                 <el-button type="primary" @click="onSubmit" style="margin-top: 10px">查询</el-button>
                             </el-form-item>
                         </el-form>
                         <el-menu style="margin: 0" class="main-menu" :default-openeds="['1']" :default-active="defaultActive" @select="handleList">
-                        <el-submenu index="1">
+                        <el-submenu index="1" style="width: 90%">
                             <template slot="title"><i class="el-icon-s-tools"></i>设备</template>
                             <el-col :span="12"></el-col>
-
                             <el-col  :offset="2">
+
+
                             <el-tree :data="areaData"
                                      :props="defaultProps"
                                      @node-click="handleNodeClick"
                                      node-key="id"
-                                     :default-expanded-keys="defaultOpenKey"
+                                     :filter-node-method="filterNode"
+                                     default-expand-all
+                                     ref="tree"
                                      accordion
                             ></el-tree>
+
+
                             </el-col>
 <!--                            <el-menu-item v-for="item in info"-->
 <!--                                          :key="item.device_id"-->
@@ -131,56 +137,126 @@
 
         <el-col :span="20">
             <el-container >
-                <el-header height="30px">设备信息</el-header>
+                <el-header height="30px">
+                    <div style="display: flex">
+                        设备信息
+                        <el-checkbox   style="margin-right: 20px;margin-left: 15px"  v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+                        <el-checkbox-group v-model="checkedStatus" @change="handleCheckedCitiesChange">
+                            <el-checkbox  label="在线" style="margin-right: 20px"></el-checkbox>
+                            <el-checkbox  label="离线" style="margin-right: 20px"></el-checkbox>
+                            <el-checkbox  label="故障" style="margin-right: 20px"></el-checkbox>
+                        </el-checkbox-group>
+                    </div>
+                </el-header>
                 <el-main>
                     <el-row :gutter="0" >
                     <el-col :span="18">
-                        <div id="map1" class="" style="width: 100%;height:680px;"></div>
+                        <div id="map1" class="" style="width: 100%;height:710px;"></div>
+
+<!--                        <el-button @click="adad"></el-button>-->
+<!--                        <div class="amap-wrapper" style="width: 100%;height: 710px;">-->
+<!--                            <el-amap class="amap-box" :vid="'amap-vue'" :events="events" :amap-manager="amapManager">-->
+<!--                            </el-amap>-->
+<!--                        </div>-->
+
+<!--                        <baidu-map style="display: flex;flex-direction: column"-->
+<!--                                   :center="{lng: this.center[0], lat: this.center[1]}"-->
+<!--                                   :zoom="15"-->
+<!--                                   :scroll-wheel-zoom="true"-->
+<!--                                   :mapStyle="baidumapStyle"-->
+<!--                                   @ready="mapHandler"-->
+<!--                                   >-->
+<!--                            {{center}}<el-button @click="points=[]"></el-button>-->
+
+<!--                            <bm-view style="width: 100%; height:710px; flex: 1"></bm-view>-->
+<!--                            <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>-->
+<!--                            <bm-info-window :position="{lng: 116.404, lat: 39.915}" title="Info Window Title"></bm-info-window>-->
+
+<!--                            <bm-point-collection :points="points"-->
+<!--                                                 shape="BMAP_POINT_SHAPE_CIRCLE"-->
+<!--                                                 color="#2fffff"-->
+<!--                                                 size="BMAP_POINT_SIZE_NORMAL"-->
+<!--                                                 >34-->
+<!--                            </bm-point-collection>-->
+<!--                        </baidu-map>-->
                     </el-col>
-                    <el-col :span="6">
-                        <div >
+                    <el-col :span="6" style="height: 100%">
+
+                        <div style="height: 100%">
+                            <el-scrollbar class="default-scrollbar" wrap-class="default-scrollbar__wrap" view-class="default-scrollbar__view" :native="false" :onresize="true">
+
                             <el-card class="box-card3"  >
+<!--                                多选框 未开发-->
+<!--                                <div style="display: flex;flex-wrap: nowrap">-->
+<!--                                <el-checkbox   style="margin-right: 20px;margin-left: 15px"  v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>-->
+<!--                                <el-checkbox-group v-model="checkedStatus" @change="handleCheckedCitiesChange">-->
+<!--                                    <el-checkbox  label="在线" style="margin-right: 20px"></el-checkbox>-->
+<!--                                    <el-checkbox  label="离线" style="margin-right: 20px"></el-checkbox>-->
+<!--                                    <el-checkbox  label="故障" style="margin-right: 20px"></el-checkbox>-->
+<!--                                </el-checkbox-group>-->
+<!--                                </div>-->
+<!--                                <el-button v-on:click="sshow = !sshow">转换</el-button>-->
 
-                                <el-divider > <span style="font-size: 18px;font-weight: bold">设备状态</span></el-divider>
-                                <div v-if="seen">
-                                <el-row >
-                                    <!--//左框-->
-                                    <el-col :span="9" style="text-align: right;font-weight: bold">
-<!--                                        <el-row v-for="(i,index) in baseInfo.k1" :key="index">-->
-<!--                                       {{i}}-->
-<!--                                        </el-row>-->
-                                        <el-row >设备号</el-row>
-                                        <el-row v-for="(value,name) in dynamicInfo" :key="name">
-                                            {{name}}
+<!--                                <el-button v-on:click="change">转换</el-button>-->
+<!--                                <el-button v-on:click="addLine">ADD</el-button>-->
+<!--                                <el-button v-on:click="clear">Clear</el-button>-->
+                                <el-button v-on:click="timeOrder">按时间排序</el-button>
+                                <el-button v-on:click="typeOrder">按订单状态排序</el-button>
+<!--                                <el-button v-on:click="ws">ws</el-button>-->
+<!--                                <el-button v-on:click="send">send</el-button>-->
+
+                                <el-divider ></el-divider>
+                                <transition-group  appear name="animated-line"
+                                                   >
+                                    <el-card v-if="sshow" :class="{cardLine:1===1,cardLineRed:error.bill.status==='未维修',cardLineGreen:error.bill.status==='维修中',cardGray: error.bill.status==='已维修'}"
+                                             @mouseenter.native="move(error)"
+                                             v-for="(error,index) in errorsCom"
+                                             :key=error.error.name+error.error.error
+                                             >
+                                        <p style="color:#ffffff;">{{error.error.area}}设备{{error.error.name}}{{error.error.error}}<br>{{error.error.time}}</p>
+                                        <br><el-divider></el-divider>
+                                        <p style="font-size: 20px;color: #ffffff">维修状态：{{error.bill.status}}<br>维修员：{{error.bill.repairer}}</p>
+                                    </el-card>
+                                </transition-group>
+
+                                <!--//---------------旧版状态-->
+                                <div v-if="false">
+                                    <el-divider > <span style="font-size: 18px;font-weight: bold">设备状态</span></el-divider>
+                                    <div v-if="seen">
+                                        <el-row >
+                                            <!--//左框-->
+                                            <el-col :span="9" style="text-align: right;font-weight: bold">
+                                                <el-row >设备号</el-row>
+                                                <el-row v-for="(value,name) in dynamicInfo" :key="name">
+                                                    {{name}}
+                                                </el-row>
+                                            </el-col>
+                                            <!--//右框-->
+                                            <el-col :span="12" :offset = "0" style="text-align: left">
+                                                <el-row ><span style="text-align: left;font-weight: bold">:</span> {{current_id}}</el-row>
+                                                <el-row v-for="(value,name) in dynamicInfo" :key="name">
+                                                    <span style="text-align: left;font-weight: bold">:</span> {{value}}
+                                                </el-row>
+                                            </el-col>
                                         </el-row>
-                                    </el-col>
-                                    <!--//右框-->
-                                    <el-col :span="12" :offset = "0" style="text-align: left">
-<!--                                        <el-row v-for="(i,index) in baseInfo.k2" :key="index">-->
-<!--                                            <span style="text-align: left;font-weight: bold">:</span> {{i}}-->
-<!--                                        </el-row>-->
-                                        <el-row ><span style="text-align: left;font-weight: bold">:</span> {{current_id}}</el-row>
-                                        <el-row v-for="(value,name) in dynamicInfo" :key="name">
-                                            <span style="text-align: left;font-weight: bold">:</span> {{value}}
+                                    </div>
+
+
+
+                                    <!--//详情按钮-->
+                                    <div v-if="seen">
+                                        <el-divider></el-divider>
+                                        <el-row >
+                                            <el-col style="text-align: right">
+                                                <el-button round @click="push" class="el-icon-info"> 详细信息</el-button>
+                                            </el-col>
                                         </el-row>
-                                    </el-col>
-                                </el-row>
+                                    </div>
                                 </div>
 
-
-
-                                <!--//详情按钮-->
-                                <div v-if="seen">
-                                    <el-divider></el-divider>
-                                <el-row >
-                                    <el-col style="text-align: right">
-                                        <el-button round @click="push" class="el-icon-info"> 详细信息</el-button>
-                                    </el-col>
-                                </el-row>
-                                </div>
 
                             </el-card>
-
+                        </el-scrollbar>
                         </div>
 
 
@@ -193,31 +269,31 @@
 
         </el-col>
     </el-row>
-
-
-     <el-row>
-         <el-col :span="4">
-         </el-col>
-     </el-row>
     </div>
 </template>
 
 <script>
-	import {normalUrl,offlineUrl,errorUrl} from '../components/wifiIcon'
+    import {testUrl,pushUrl} from '../config/env'
 	import TweenLite from "gsap";
-	import headTop from '../components/headTop';
-	import { getErrorInfo,getArea,getDevSensors,getGPS,getLatesTemById,getLatestPowerById,
-        getLatestWaterById,getDevCount} from '@/api/getData'
+	import headTop from './headTop';
+	import animatedNumber from './animatedNumber';
+	import { getAllTree,getOneTree,getOrder,getErrorInfo,getArea,getDevSensors,
+        getGPS,getDevCount} from '@/api/getData'
 	import echarts from 'echarts/lib/echarts';
     import 'echarts/lib/chart/scatter'
 	import 'echarts/lib/component/tooltip';
 	import 'echarts/lib/component/title';
 	import 'echarts/extension/bmap/bmap'
-	import {getGPSByArea} from "../api/getData";
-     let myChart=null;
+	import Stomp from "webstomp-client"
+    import SockJS from "sockjs-client"
+
+	import { AMapManager } from 'vue-amap';
+	import VueAMap from 'vue-amap';
+	const statusOptions = ['在线', '离线', '故障'];
+	let amapManager = new VueAMap.AMapManager();
 	export default {
 		components:{
-			headTop
+			headTop,animatedNumber
         },
 		data(){
 			return {
@@ -225,15 +301,49 @@
 					device_id:null,
 				},
 				//////分区
+                updateReady:false,
+                updateCompeleted:false,
+                ii:0,
+                cc:0,
                 defaultTemp:[1],
 				defaultOpenKey:[1],
-                area:[],
-				areaData:[],
+				areaData:[
+					{
+						id: '所有分区',
+						area_name:'所有分区',
+						children:[],
+						isparent:true,
+					},
+                ],//完整树
+                rootArea:[],//权限树
 				defaultProps: {
 					children: 'children',
-					label: 'label'
+					label: 'area_name',
+					id:'id',
 				},
+				nodePointer:{},
+				initFlag:false,
 				//故障框滚动动画、数据、列表值
+                errors:[
+                    // {
+                    // 	error:{name:"ns10001",area:"宝安区",error:"水浸异常 ",time:"2019.8.27 16:18:00"},
+                    //     bill:{status:"未维修",repairer:"无",tel:""}
+                    // },
+					// {
+					// 	error:{name:"ns10002",area:"宝安区",error:"重合闸故障 ",time:"2019.8.27 16:18:00"},
+					// 	bill:{status:"维修中",repairer:"蔡徐坤",tel:""}
+					// },
+                    // {
+					// 	error:{name:"ns10003",area:"宝安区",error:"重合闸故障 ",time:"2019.8.21 16:18:00"},
+					// 	bill:{status:"已维修",repairer:"蔡徐坤",tel:""}
+					// }
+                ],
+                errorsCom:[
+
+                ],
+                tt:0,
+                orderFlag:false,
+                sshow:true,
                 gridOrder:0,
                 centreData:{name:"",area:"",error:"",time:""},
 				animate:false,
@@ -258,43 +368,86 @@
                 ////分页
 				currentPage: 1,
 				pageSize:6,
-                // pageCount:12,
-
                 //设备总数
 				testCount:null,
-                totalNum:0,
                 totalData:0,
-                offlineNum:0,
-                errNum:0,
                 //GPS信息
 				info:[],
 				center: [113.94117874959207,22.545135832607247],
 				center2: [113.95,22.545135832607247],
                 //动画数
-				tweenedNumber:0,
-                number:0,
-				tweenedTotalNumber:0,
 				tweenedTotalData:0,
-				tweenedOfflineNum:0,
-				tweenedErrNum:0,
                 //当前id
                 current_id:"",
                 //按钮可视
                 seen:false,
                 //设备状态信息
-                baseInfo:{
-					k1:["设备号","温度","湿度","重合闸状态","防雷器状态","水浸状态"],
-                    k2:["",""," ","","",""]
-                },
                 dynamicInfo:{},
                 //test
                 ii:0,
 				errorFrameTimer:"",
                 timer:"",
-				// myChart:null,
+				myChart:null,
                 //mapFrame
                 mapFrameId:'',
                 mapFramecontent:'Loading',
+                //newMap
+				baidumapStyle:{
+					styleJson: [
+						{
+							"featureType": "building",
+							"elementType": "labels.text.fill",
+							"stylers": {
+								"visibility": "off"
+							}
+						},
+						{
+							"featureType": "manmade",
+							"elementType": "all",
+							"stylers": {
+								"visibility": "off"
+							}
+						},
+						{
+							"featureType": "poilabel",
+							"elementType": "all",
+							"stylers": {
+								"visibility": "off"
+							}
+						},
+						{
+							"featureType": "road",
+							"elementType": "all",
+							"stylers": {}
+						}
+					],
+				},
+				points: [],
+                /////高德MAP
+				amapManager,
+				events: {
+					init(o) {
+
+					}
+				},
+                //queue
+				normalState:[],
+				offlineState:[],
+				errorState:[],
+                starState:[],
+                frashActive:0,
+                //多选框
+				checkAll: true,
+				isIndeterminate: false,
+				checkedStatus:["在线","离线","故障"],
+                status:statusOptions,
+                //信息框
+				opts : {
+					width : 100,     // 信息窗口宽度
+					height: 100,     // 信息窗口高度
+					title : "<p style='font-size: 20px;text-align: center;margin-bottom: 5px'>设备状态</p>" , // 信息窗口标题
+				},
+
             }
 		},
         created(){
@@ -307,41 +460,306 @@
 				if(this.gridData[i]===null){console.log("break");break;}
 				this.currentPageData[i]=this.gridData[i];
 			}
+
 			this.myChart = echarts.init(document.getElementById('map1'));
 			this.initData(this.myChart);
+
 		},
 		methods: {
+			handleCheckAllChange(val) {
+				this.checkedStatus = val ? statusOptions : [];
+				this.isIndeterminate = false;
+				this.handldFrashActive(0);
+			},
+            handldFrashActive(bool){//地图未处于(0)/处于(1)轮询更新时，处理状态多选框,并更新地图
+				if(this.frashActive===bool){
+					//多选框显示
+					var N=this.checkedStatus.indexOf("在线");
+					var O=this.checkedStatus.indexOf("离线");
+                    var E=this.checkedStatus.indexOf("故障");
+					if(N!==-1){//正常点渲染
+						this.Npoint.setPoints(this.normalState);
+					}else{
+						this.Npoint.clear();}
+					if(O!==-1){//离线点渲染
+						this.Opoint.setPoints(this.offlineState);
+					}else{
+						this.Opoint.clear();}
+					if(E!==-1){//故障点渲染
+						this.Epoint.setPoints(this.errorState);
+                    }else{
+						this.Epoint.clear();}
+
+				}
+            },
+            handleStarRender(){
+				var Star=this.starState.length;
+				if(Star>0){//聚焦点渲染
+					var Noptions = {
+						size: BMAP_POINT_SIZE_HUGE,
+						shape: BMAP_POINT_SHAPE_STAR,
+						color: '#519be6'
+					};
+					var Ooptions = {
+						size: BMAP_POINT_SIZE_HUGE,
+						shape: BMAP_POINT_SHAPE_STAR,
+						color: '#636563'
+					};
+					var Eoptions = {
+						size: BMAP_POINT_SIZE_HUGE,
+						shape: BMAP_POINT_SHAPE_STAR,
+						color: '#dd0009'
+					};
+
+					this.Starpoint.setPoints(this.starState);
+					if(this.starState[0].status==='在线'||this.starState[0].status==='正常'){
+						this.Starpoint.setStyles(Noptions);
+                    }else if(this.starState[0].status==='离线'){
+						this.Starpoint.setStyles(Ooptions);
+                    }else{
+						this.Starpoint.setStyles(Eoptions);
+                    }
+				}else{
+					this.Starpoint.clear();}
+            },
+			handleCheckedCitiesChange(value) {
+				let checkedCount = value.length;
+				this.checkAll = checkedCount === this.status.length;
+				this.isIndeterminate = checkedCount > 0 && checkedCount < this.status.length;
+				this.handldFrashActive(0);
+				},
+			async adad(){
+			    await this.getGPSs();
+				let a=[];
+				for(let i=0;i<this.info.length;i++){
+					let b={};
+					b.lnglat=[this.info[i].longitude,this.info[i].latitude];
+					b.name="test";
+					b.id=1;
+					a.push(b);
+				}
+				let o = amapManager.getMap();
+
+				var style = {
+					url: '//vdata.amap.com/icons/b18/1/2.png',
+					anchor: new AMap.Pixel(6, 6),
+					size: new AMap.Size(11, 11)
+				};
+
+				var massMarks = new AMap.MassMarks(a, {
+					opacity: 0.8,
+					zIndex: 111,
+					cursor: 'pointer',
+					style: style
+				});
+
+				massMarks.setMap(o);
+
+
+				// massMarks.setData(a);
+				// massMarks.setMap(o);
+
+            },
+			send(){
+				console.log("fa送");
+				this.client.send("/app/hello",JSON.stringify({name:"2323",content:"sdasdasd"}),{});
+				console.log("成功");
+            },
+			ws(){
+				let path=testUrl+"/chat";
+				this.socket = new SockJS(path);
+				this.client=Stomp.over(this.socket);
+				var self=this;
+				this.client.connect({},function(frame){
+					console.log("ws连接成功");
+					self.client.subscribe('/user/queue/order',function(greeting){
+						console.log(greeting.body);
+						const temp=JSON.parse(greeting.body);
+						const orderStatus=temp["order_status"];
+						const id=temp['id'];
+
+						for(var i=0;i<self.errorsCom.length;i++){
+							if(self.errorsCom[i].bill.id===id){
+								self.errorsCom[i].bill.status=orderStatus;break
+							}
+						}
+
+
+					});
+					self.client.subscribe('/user/queue/error/remove',function(greeting){
+						console.log(greeting.body);
+						const temp=JSON.parse(greeting.body);
+                        const name=temp['device_id'];
+                        const error=temp['description'];
+                        for(var i=0;i<self.errorsCom.length;i++){
+							if(self.errorsCom[i].error.name===name&&self.errorsCom[i].error.error===error){
+								self.errorsCom.splice(i,1);break;
+							}
+                        }
+
+
+
+
+					});
+					self.client.subscribe('/user/queue/error/add',function(greeting){
+						console.log(greeting.body);
+                        const temp=JSON.parse(greeting.body);
+						//故障
+                        const a={};
+						a.name=temp['device_id'];
+						a.area=temp['area_name'];
+						a.error=temp['description'];
+						a.time=temp['create_time'];
+						console.log(a);
+						//订单
+						getOrder({device_id:a.name}).then(result =>{
+							console.log(result);
+							const Obj={};
+							Obj.error=a;
+							Obj.bill={};
+							Obj.bill.status=result.msg[0].order_status;
+							Obj.bill.id=order.msg[0].id;
+							Obj.bill.repairer='开发中';
+							self.errorsCom.splice(0,0,Obj);
+							if(self.orderFlag){
+								self.typeOrder();
+							}
+                        });
+
+
+
+						// this.open();
+					});
+					self.client.subscribe('/topic/status',async function(greeting){
+						console.log('change');
+						let temp=JSON.parse(greeting.body);
+						var str=temp.device_id;
+						if(self.info2[str]!==undefined){
+							if(self.starState.length>0){//聚焦点样式改变
+								if(self.starState[0].device_id===temp.device_id){
+									self.starState[0].status=temp.status;
+                                }
+                            }
+							self.info2[str].status=temp.status;
+							self.frashActive=1;
+                        }
+
+					});
+
+				});
+				this.mapTimer=setInterval(this.mapFrash,1000);
+
+			},
+			async mapFrash(){
+				if(this.frashActive===1){
+					console.log("frash");
+					await this.statusConvert();
+					//多选框切换显示、轮询显示、聚焦点(star)渲染
+					this.handldFrashActive(1);
+					this.handleStarRender();
+					this.frashActive=0;
+                }else{
+					return
+				}
+
+			},
+            open(){
+				alert("连接成功");
+
+            },
+			change(){
+				if(this.errorsCom[0].bill.status==="未维修"){
+					this.errorsCom[0].bill.status="维修中";
+				}else{
+					this.errorsCom[0].bill.status="未维修";
+                }
+				if(this.orderFlag){
+					this.typeOrder();
+				}
+
+            },
+			timeOrder(){
+				this.orderFlag=false;
+				this.errorsCom.sort(function(a,b){
+					if (a.error.time >= b.error.time) {
+						return -1;
+					} else {
+						return 1;
+					}
+				});
+            },
+			timeStamp(time){
+				var date = time.toString();
+				date = date.substring(0,19);
+				date = date.replace(/-/g,'/');
+				var timestamp = new Date(date).getTime();
+				return timestamp;
+			},
+            typeOrder(){
+				this.orderFlag=true;
+                this.errorsCom.sort(function(a,b){
+                	var x=0;
+                	var y=0;
+                    if(a.bill.status==='已维修'){
+                    	x=1;
+                    }else if(a.bill.status==='未维修'){
+                    	x=0;
+                    }else{
+                    	x=-1;
+                    }
+					if(b.bill.status==='已维修'){
+						y=1;
+					}else if(b.bill.status==='未维修'){
+						y=0;
+					}else{
+						y=-1;
+					}
+
+					if(x===y){
+						if(a.error.time>=b.error.time){
+							return -1;
+						}else{
+							return 1;
+						}
+					}
+                    if (x>y) {
+							return -1;
+						}else{
+							return 1;
+						}
+
+
+
+
+                });
+            },
+			clear(){
+				this.errorsCom.splice(2,1);
+            },
+			addLine(){
+				let aa=this.tt++;
+				let timea="2019.8.27 16:18:00";
+				let tt=this.timeStamp(timea);tt+=(aa+1)*100000;console.log(tt);
+				timea=new Date(tt).toLocaleString().replace(/:\d{1,2}$/,' ');console.log(timea);
+				let random=Math.floor(Math.random()*2);
+				let ss='';let rr='';
+				if(random===1){ss= "未维修";rr="无"}else{ss="维修中";rr="蔡徐坤"}
+				let ll={
+					error:{name:aa,area:"宝安区",error:"水浸异常 ",time:timea},
+					bill:{status:ss,repairer:"无",tel:""}
+				};
+			    this.errorsCom.splice(0,0,ll);
+            },
+			async move(val){
+				//setTimeout回调输出loading或结果
+				console.log(val);
+            },
 			testButt(){
 				console.log('233');
-				// this.myChart=echarts.init(document.getElementById('map1'));
-				this.myChart.setOption({
-					// bmap: {
-					// 	// center: this.center2,
-					// 	// zoom: 5,
-					// 	// roam: true,
-					// },
-					series: [
-						{
-							name: '正常',
-							data: this.normalState,
-						},
-						{
-							name: '故障',
-							data: this.errorState,
-
-						},
-						{
-							name: '离线',
-							data: this.offlineState,
-						},
-
-
-					]
-				})
             },
 			async onSubmit() {
 				if (this.formInline.device_id === null||this.formInline.device_id === "") {
-
+                    return
 				} else {
 					let ff=this.info.find((ele) => (ele.device_id.toString()===this.formInline.device_id));
 					if(ff){
@@ -356,27 +774,83 @@
 
 				}
 			},
+			filterNode(value, data,node) {
+				if(!this.initFlag){//数据初始化标志
+					//搜索字段
+					if(node.level===1){
+						data.keyword=[];
+					}else{
+						data.keyword=[];
+						for(const i of node.parent.data.keyword){
+							data.keyword.push(i);
+						}
+						data.keyword.push(data.area_name);
+					}
+
+					if(this.rootArea.indexOf(node.key)!==-1){
+						this.nodePointer[node.label]=node.data;
+
+					}
+
+				}else{//判断结点以及筛选
+					if (!value) {//输入为空
+						if(this.rootArea.indexOf(node.key)!==-1){
+							return true;
+						}
+					}else{
+						if(node.visible!==undefined ){
+							for(const i of data.keyword)
+								if(i.indexOf(value) !== -1){
+									return true;
+								}
+
+						}
+					}
+				}
+			},
 			async getAreas(){//分区初始化
-				const area=await getArea({});
-				this.area=area;
+				//完整分区树
+				const Tree=await getAllTree();
+				this.areaData[0].children=Tree;
+				//权限树
+				const One=await getOneTree();
+				this.rootArea=One;
+
+				await this.$refs.tree.filter();//往分区树导入设备数据
+				this.initFlag=true;
+				this.$refs.tree.filter();//筛选权限树
+				this.shrink(this.$refs.tree.getNode(this.areaData[0].id));//缩进区域
             },
             async getError(){//故障框
 
 				//////故障初始化
-				// const errorInfo=await getErrorInfo({});
-				// let errorTemp=[];
-				// errorInfo.forEach(item => {
-				// 	let a={};
-				// 	a.name=item.device_id;
-				// 	a.area=item.area_name;
-				// 	a.error=item.description;
-				// 	a.time=item.create_time;
-				// 	errorTemp.push(a);
-				// });
-				// let tempObj = Object.assign(errorTemp);
-				// this.gridData=errorTemp;
-				// this.items=tempObj;
-
+				const errorInfo=await getErrorInfo({});
+				let errorTemp=[];
+				errorInfo.forEach(item => {
+					let a={};
+					a.name=item.device_id;
+					a.area=item.area_name;
+					a.error=item.description;
+					a.time=item.create_time;
+					errorTemp.push(a);
+				});
+				this.gridData=errorTemp;
+                //获取故障订单
+                let Etemp=[];
+				for(var i=0;i<this.gridData.length;i++){
+					var error=this.gridData[i];
+					let order=await getOrder({device_id:error.name});
+					console.log(order);
+					let Obj={};
+					Obj.error=error;
+					Obj.bill={};
+					Obj.bill.status=order.msg[0].order_status;
+					Obj.bill.id=order.msg[0].id;
+					Obj.bill.repairer='开发中';
+					await Etemp.push(Obj);
+				}
+				this.errors=Etemp;
+				console.log(Etemp);
 				//errorFrameTable第一页初始化
 				for(var i=0;i<this.pageSize;i++){
 					if(this.gridData[i]===null){console.log("break");break;}
@@ -389,14 +863,40 @@
 			async getGPSs(){////////获取GPS
 				var GPS=await getGPS();
 				this.info=GPS;
+
 			},
+			convertAreaData:function(){
+
+
+					this.info.forEach(item => {
+						if(this.nodePointer[item.area]){
+							let temp={};
+							temp.id=item.device_id;
+							temp.area_name=item.device_id;
+							this.nodePointer[item.area].children.push(temp)
+                            console.log('233');
+                        }
+					});
+                // if(this.$refs.tree.getNode(this.areaData[0].id).childNodes){//缩进
+				// 	this.$refs.tree.getNode(this.areaData[0].id).childNodes.forEach(item =>{
+				//         item.expanded=false;
+				// 	});
+				// }
+                this.shrink(this.$refs.tree.getNode(this.areaData[0].id));
+
+
+			},
+            shrink(node){
+				if(node.childNodes){
+					if(node.level!==1)node.expanded=false;
+					node.childNodes.forEach(item =>{
+						this.shrink(item);
+                    });
+                }
+            },
             async getTotalInfo(){
 				const cc = await getDevCount({});
-				this.testCount=cc.totalNum;
-				this.totalNum=cc.totalNum;
 				this.totalData=cc.totalData;
-				this.offlineNum=cc.offLineNum;
-				this.errNum=cc.errNum;
             },
 			async updateError(){
 				//////故障初始化
@@ -410,7 +910,6 @@
 					a.time=item.create_time;
 					errorTemp.push(a);
 				});
-				let tempObj = Object.assign(errorTemp);
 				this.gridData=errorTemp;
 				//故障表更新
 				for(var i=0;i<this.pageSize;i++){
@@ -423,38 +922,91 @@
 				this.updateError();
 				this.getTotalInfo();
 				this.getGPSs();
-				this.myChart.setOption({
-					// bmap: {
-					// 	// center: this.center2,
-					// 	// zoom: 5,
-					// 	// roam: true,
-					// },
-					series: [
-						{
-							name: '正常',
-							type: 'scatter',
-							data: this.normalState,
-						},
-						{
-							name: '故障',
-							type: 'scatter',
-							data: this.errorState,
-
-						},
-						{
-							name: '离线',
-							type: 'scatter',
-							data: this.offlineState,
-						},
-
-
-					]
-				})
 			},
-			async initData(chart){////////初始化图表
-				await this.getGPSs();
+            test(){
+				console.log("sfds");
+            },
+			setEventListener(Collection,bmap,isStar){
 				var self=this;
-				chart.setOption({
+				// 监听点击事件
+				Collection.addEventListener('click', async function (e) {
+					//聚焦点(star)坐标导入渲染
+                    if(!isStar){
+                    	self.starState[0]={lng: e.point.lng,lat:e.point.lat,status:e.point.status,device_id:e.point.device_id};
+						self.handleStarRender();
+                    }
+					//单设备状态跳转URl
+					var url = pushUrl + e.point.device_id;
+					//获得信息框中心点
+					var point = new BMap.Point(e.point.lng, e.point.lat);
+					//信息框内容
+					let left = '<div style="text-align: right;margin-left:30px;background: #f4f4f4" class="left"><div>设备号: </div><div>状态: </div></div>';
+					let right= '<div ><div>' + e.point.device_id + '</div><div>' + e.point.status + '</div></div>';
+                    let str  =  left+right;
+                    //信息框实例
+					var infoWindow = new BMap.InfoWindow(str, self.opts);
+					if (e.point.status !== '离线') {
+						//获取状态信息
+						const device = await getDevSensors({device_id:e.point.device_id});
+						const sensors=device.sensors;
+						//编辑状态信息
+						left = '<div style="text-align: right;margin-left:30px;background: #F4F4F4" class="left"><div>设备号: </div><div>状态: </div>';
+						right= '<div ><div>' + e.point.device_id + '</div><div>' + e.point.status + '</div>';
+						Object.keys(sensors).forEach(function (key) {
+							left += '<div>' + key + ': </div>';
+							right += '<div>' + sensors[key] + '</div>';
+						});
+						left += '</div>';
+						right += '</div>';
+
+
+						str  =  left+right;
+						str += '<div class="right"><a href=' + url + ' style="border:1px  double;margin-top="5px"">详细信息</a></div>';
+						infoWindow.setHeight(120+30*Object.keys(sensors).length);
+						infoWindow.setContent(str);
+					}
+
+
+					bmap.openInfoWindow(infoWindow, point);
+				});
+            },
+            statusConvert(){
+				var Ntemp=[];
+				var Otemp=[];
+				var Etemp=[];
+				for(var i in this.info2) {
+                    if(this.info2[i].status==="正常"){//后台传‘正常’转换成‘在线’
+                        let a={lng: this.info2[i].lng,lat:this.info2[i].lat,device_id:i,status:'在线'};
+                        Ntemp.push(a);
+                    }else if(this.info2[i].status==="离线"){
+						let a={lng: this.info2[i].lng,lat:this.info2[i].lat,device_id:i,status:this.info2[i].status};
+						Otemp.push(a);
+					}else{
+						let a={lng: this.info2[i].lng,lat:this.info2[i].lat,device_id:i,status:this.info2[i].status};
+						Etemp.push(a);
+					}
+				}
+                this.normalState=Ntemp;
+				this.offlineState=Otemp;
+				this.errorState=Etemp;
+            },
+			async initData(chart){
+				////////初始化图表
+				//GPS信息转化
+				await this.getGPSs();
+				this.updateReady=true;
+
+				var self=this;
+				this.CCtimer=setInterval(function(){
+					if(self.updateReady&&!self.updateCompeleted){
+						self.cc++;
+					}else{
+						clearInterval(self.CCtimer);
+					}
+				},1000);
+
+                //tooltip
+				await chart.setOption({
 					title: {
 						text: '设备总览',
 						subtext: '单击进入状态',
@@ -627,15 +1179,11 @@
 							]
 						}
 					},
-					tooltip : {
+					/*tooltip : {
 						trigger: 'item',
-						// formatter:'设备号:{b}<br/>状态:{a}'
 						triggerOn:'mousemove',
 						formatter: function (params, ticket, callback) {
-
-							// let res='设备号: '+params.name+'<br>'+'&nbsp;&nbsp;&nbsp;&nbsp;状态: '+params.seriesName+'<br>';
-							let res='<div style="text-align: right" class="left"><div>设备号: </div><div>状态: </div></div>'+'<div class="right"><div>'+params.name+'</div><div>'+params.seriesName+'</div></div>';
-
+                            let res='<div style="text-align: right" class="left"><div>设备号: </div><div>状态: </div></div>'+'<div class="right"><div>'+params.name+'</div><div>'+params.seriesName+'</div></div>';
 							if(params.seriesName==='离线'){
 								return res;
                             }
@@ -662,11 +1210,7 @@
 
 								});
                             }
-
-
                             return self.mapFramecontent;
-
-							// return res+'<br><br><p style="text-align: center">loading...';
 
 						}
 					},
@@ -678,16 +1222,6 @@
 							symbol:normalUrl,
 							data: this.normalState,
 							symbolSize:20,
-							// label: {
-							// 	normal: {
-							// 		formatter: '{b}',
-							// 		position: 'bottom',
-							// 		show: true
-							// 	},
-							// 	emphasis: {
-							// 		show: true
-							// 	},
-							// },
 							itemStyle: {
 								normal: {
 									color: '#519be6'
@@ -704,16 +1238,6 @@
 							data: this.errorState,
 							symbol:errorUrl,
 							symbolSize:20,
-							// label: {
-							// 	normal: {
-							// 		formatter: '{b}',
-							// 		position: 'bottom',
-							// 		show: true
-							// 	},
-							// 	emphasis: {
-							// 		show: true
-							// 	},
-							// },
 							itemStyle: {
 								normal: {
 									color: '#dd0009'
@@ -723,35 +1247,69 @@
 						{
 							name: '离线',
 							type: 'scatter',
+                            data:this.offlineState,
 							coordinateSystem: 'bmap',
-							data: this.offlineState,
 							symbolSize:15,
 							symbol:offlineUrl,
-							// label: {
-							// 	normal: {
-							// 		formatter: '{b}',
-							// 		position: 'bottom',
-							// 		show: true
-							// 	},
-							// 	emphasis: {
-							// 		show: true
-							// 	},
-							// },
 							itemStyle: {
 								normal: {
 									color: '#373837'
 								}
 							}
 						},
-
-
-					]
+					]*/
 				});
-				this.myChart.on('click', this.butt);
+				//拿到bmap实例
+				var ecModel = this.myChart._model;
+				var bmap = null;
+				ecModel.eachComponent('bmap', function (bmapModel) {
+					if(bmap == null){
+						bmap = bmapModel.__bmap;
+					}
+				});
+				//设置不同状态点的样式
+				var Noptions = {
+					size: BMAP_POINT_SIZE_BIG,
+					shape: BMAP_POINT_SHAPE_CIRCLE,
+					color: '#519be6'
+				};
+				var Ooptions = {
+					size: BMAP_POINT_SIZE_BIG,
+					shape: BMAP_POINT_SHAPE_CIRCLE,
+					color: '#636563'
+				};
+				var Eoptions = {
+					size: BMAP_POINT_SIZE_BIG,
+					shape: BMAP_POINT_SHAPE_CIRCLE,
+					color: '#dd0009'
+				};
+				var Staroptions = {
+					size: BMAP_POINT_SIZE_HUGE,
+					shape: BMAP_POINT_SHAPE_STAR,
+					color: '#dd0009'
+				};
+
+				// 初始化PointCollection实例
+                await this.statusConvert();
+				this.Npoint = new BMap.PointCollection(this.normalState, Noptions,false);
+				this.Opoint = new BMap.PointCollection(this.offlineState, Ooptions,false);
+                this.Epoint = new BMap.PointCollection(this.errorState, Eoptions,false);
+				this.Starpoint = new BMap.PointCollection(this.starState, Staroptions,true);
+                //注册监听事件
+				this.setEventListener(this.Npoint,bmap);
+				this.setEventListener(this.Opoint,bmap);
+				this.setEventListener(this.Epoint,bmap);
+				this.setEventListener(this.Starpoint,bmap);
+				bmap.addOverlay(this.Npoint);
+				bmap.addOverlay(this.Opoint);
+				bmap.addOverlay(this.Epoint);
+				await bmap.addOverlay(this.Starpoint);
+					//建立WS连接
+                this.ws();
 				//设备列表分区数据
-				this.convertAreaData();
+				// this.convertAreaData();
 				//数据更新计时器
-				this.timer=setInterval(this.updateData, 5000);
+				// this.timer=setInterval(this.updateData, 5000);
 			},
 			async initialData(){
 				console.log("数据初始化");
@@ -764,9 +1322,9 @@
 
 
 			},
-			handleNodeClick(data) {
+			handleNodeClick(data,node) {
 				if(data.children===undefined){
-					this.handleList(data.label);
+					this.handleList(node.label);
                 }else{
 					let temp=[];
 					temp[0]=data.id;
@@ -775,13 +1333,6 @@
                 }
 			},
 			scroll(){
-				// console.log("errorFrame",this.ii);
-				// this.animate=true;    // 因为在消息向上滚动的时候需要添加css3过渡动画，所以这里需要设置true
-				// setTimeout(()=>{      //  这里直接使用了es6的箭头函数，省去了处理this指向偏移问题，代码也比之前简化了很多
-				// 	this.items.push(this.items[0]);  // 将数组的第一个元素添加到数组的
-				// 	this.items.shift();               //删除数组的第一个元素
-				// 	this.animate=false;  // margin-top 为0 的时候取消过渡动画，实现无缝滚动
-				// },2000)
                 this.centreData=this.gridData[this.gridOrder];
                 if((this.gridOrder+1)>=this.gridData.length){
 					this.gridOrder=0;
@@ -802,10 +1353,14 @@
             shouwInList(key){
                 this.current_id=key;
             },
-			findInMap(key){
-				let ff=this.info.find((ele) => (ele.device_id.toString()===key));
-				this.center=[ff.longitude,ff.latitude];
-
+			async findInMap(key){
+				//设置中心点
+				let ff=this.info2[key];
+				this.center=[ff.lng,ff.lat];
+                //聚焦点(star)导入渲染
+				this.starState[0]={lng: ff.lng,lat:ff.lat,status:ff.status,device_id:key};
+				this.handleStarRender();
+				//获取bmap实例
 				var ecModel = this.myChart._model;
 				var bmap = null;
 				ecModel.eachComponent('bmap', function (bmapModel) {
@@ -813,19 +1368,53 @@
 						bmap = bmapModel.__bmap;
 					}
 				});
-					bmap.panTo(new BMap.Point(ff.longitude, ff.latitude));
-				// this.myChart.setOption({
-				// 	bmap:{
-				// 		center: this.center
-				// 	}
-				// });
+				this.myChart.setOption({
+					bmap:{
+						zoom:17
+					}
+				});
+				///////信息框
+                //单设备状态跳转URl
+				var url = pushUrl + key;
+				//获得信息框中心点
+				var point = new BMap.Point(ff.lng, ff.lat);
+				//移动到中心点
+				bmap.panTo(point);
+				//信息框内容
+				let left = '<div style="text-align: right;margin-left:30px;background: #f4f4f4" class="left"><div>设备号: </div><div>状态: </div></div>';
+				let right= '<div ><div>' + key + '</div><div>' + ff.status + '</div></div>';
+				let str  =  left+right;
+				//信息框实例
+				var infoWindow = new BMap.InfoWindow(str, this.opts);
+                if(ff.status !=='离线'){
+					//获取状态信息
+					const device = await getDevSensors({device_id:key});
+					const sensors=device.sensors;
+					//编辑状态信息
+					left = '<div style="text-align: right;margin-left:30px;background: #F4F4F4" class="left"><div>设备号: </div><div>状态: </div>';
+					right= '<div ><div>' + key + '</div><div>' + ff.status + '</div>';
+					Object.keys(sensors).forEach(function (key) {
+						left += '<div>' + key + ': </div>';
+						right += '<div>' + sensors[key] + '</div>';
+					});
+					left += '</div>';
+					right += '</div>';
+
+
+					str  =  left+right;
+					str += '<div class="right"><a href=' + url + ' style="border:1px  double;margin-top="5px"">详细信息</a></div>';
+					infoWindow.setHeight(120+30*Object.keys(sensors).length);
+					infoWindow.setContent(str);
+                }
+				bmap.openInfoWindow(infoWindow, point);
             },
             butt(val){
 				this.current_id=val.name.toString();
             },
-			push(){
-				var a={device_id:this.current_id};
-				this.$router.push({ path:'/singleStatus',query: a});
+			push() {
+
+				var a = {device_id: this.current_id};
+				this.$router.push({path: '/singleStatus', query: a});
 			},
             convert(val){//////////数据转换
 			var res = [];
@@ -860,25 +1449,44 @@
 					this.currentPageData[i] = this.gridData[(val-1) * this.pageSize + i];
 				}
 			},
-			convertAreaData:function(){
-				let temp=[];
-				for(let i=0;i<this.area.length;i++){
-					let obj = {};
-					obj.label=this.area[i].area_name;
-					obj.id=i+1;
-					obj.children=[];
-					this.info.forEach(item => {
-						if(item.area===obj.label){
-							obj.children.push({label:item.device_id});
-						}
-					});
+            tikTok(ms){
+				return new Promise((resolve)=>setTimeout(resolve,ms));
+            },
 
-					temp.push(obj);
-				}
-				this.areaData = temp;
-			},
 		},
+        updated(){
+
+				// console.log(this.updateReady,this.updateCompeleted);
+				if(this.updateReady&&!this.updateCompeleted){
+                    for(var i=0;i<100;i++){
+                    	if(this.nodePointer[this.info[this.ii].area]){
+						let temp={};
+						temp.id=this.info[this.ii].device_id;
+						temp.area_name=this.info[this.ii].device_id;
+						this.nodePointer[this.info[this.ii].area].children.push(temp);
+						this.ii++;
+						if(this.ii===this.info.length){
+							this.updateCompeleted=true;
+						}
+						console.log("haohaohao")
+					    }
+                    }
+				}
+
+
+
+        },
 		watch: {
+			'errors':{
+				handler:async function(val){
+					// this.errorsCom=[];
+					for(let i=0;i<this.errors.length;i++){
+						this.errorsCom.push(this.errors[i]);
+						await this.tikTok(200);
+					}
+                },
+				immediate: true,
+            },
 			defaultTemp(newval,oldval) {
                 // console.log(newval[0],oldval[0]);
                 if(newval[0]===oldval[0]){
@@ -908,25 +1516,9 @@
 					this.data2=newValue;
                 }
             },
-			errNum: function(newValue) {
-				TweenLite.to(this.$data, 0.5, {
-					tweenedErrNum: newValue});
-			},
-			offlineNum: function(newValue) {
-				TweenLite.to(this.$data, 0.5, {
-					tweenedOfflineNum: newValue});
-			},
 			totalData: function(newValue) {
 				TweenLite.to(this.$data, 12, {
 					tweenedTotalData: newValue});
-			},
-			totalNum: function(newValue) {
-				TweenLite.to(this.$data, 0.5, {
-					tweenedTotalNumber: newValue});
-			},
-			testCount: function(newValue) {
-				TweenLite.to(this.$data, 0.5, {
-					tweenedNumber: newValue});
 			},
             //////////////////
             current_id:function(newval,oldval){
@@ -955,53 +1547,27 @@
 					console.log("back to home");
 				}
 			},
-
+            info2:function(newval,oldval){
+			    	console.log('change');
+            },
 		},
 		computed: {
+			//故障框
+			scrollDisabled:function(){
+                return true;
+            },
 			//状态
-            normalState:function(){
-				let temp=[];
-				this.info.forEach(item => {
-					if(item.status==="正常"){
-						temp.push(item);
-					}
-				});
-				return this.convert(temp);
-			},
-			offlineState:function(){
-				let temp=[];
-				this.info.forEach(item => {
-					if(item.status==="离线"){
-						temp.push(item);
-					}
-				});
-				return this.convert(temp);
-			},
-			errorState:function(){
-				let temp=[];
-				this.info.forEach(item => {
-					if(item.status==="故障"||item.status==="异常"){
-						temp.push(item);
-					}
-				});
-				return this.convert(temp);
-			},
+            info2:function(){
+			    let a={};
+			    this.info.forEach(item => {
+			    	a[item.device_id]={lng:item.longitude,lat:item.latitude,status:item.status};
+                });
+                return a;
+            },
 			////////////动画组
-			animatedOfflineNum  : function() {
-				return this.tweenedOfflineNum.toFixed(0);
-			},
-			animatedErrNum: function() {
-				return this.tweenedErrNum.toFixed(0);
-			},
 			animatedTotalData: function() {
 				return this.tweenedTotalData.toFixed(0);
 			},
-			animatedTotalNumber: function() {
-				return this.tweenedTotalNumber.toFixed(0);
-			},
-                animatedCount: function() {
-                    return this.tweenedNumber.toFixed(0);
-                },
             ////////////////////////
 
 			defaultActive: function(){
@@ -1040,6 +1606,91 @@
 </script>
 
 <style scoped>
+    .box-card3{
+        overflow:auto;
+        min-height: 710px;
+        /*  height: 100%;*/
+        weight: 100%;
+        padding: 0;
+    }
+    .cardLine {
+        display: inline-block;
+        border-radius: 10px;
+        width: 100%;
+        height: 80px;
+        background-color: #e2e6ff;
+        transition: all 1s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)
+
+    }
+    .cardLine:hover{
+        height: 180px;
+    }
+    .cardGray{
+        transition: all 1s ;
+        /*background: linear-gradient(to right, #f54a49, #f99a9e);*/
+        background:indianred;
+        animation:myfirst 2s ease infinite;//cubic-bezier(0.1,0.25,1,0.25)
+        animation-direction:normal;
+    }
+    @keyframes myfirst
+    {
+
+        /*0%  {background: #ff030b;}*/
+        /*100% {background: #ff8b93;}*/
+        0%  {background: #ff8b93;}
+        50% {background: #ed030a;}
+        100%{background: #ff8b93;}
+
+        /*0%   {background:linear-gradient(to right, #f54a49, #f99a9e)}*/
+        /*25%  {background:linear-gradient(to right, #f53b39, #f98689)}*/
+        /*50%  {background:linear-gradient(to right, #f51e19, #f97070)}*/
+        /*75%  {background:linear-gradient(to right, #e41c18, #f95454)}*/
+        /*100% {background:linear-gradient(to right, #da1b17, #f93a39)}*/
+    }
+    .cardGray:hover{
+        /*background: linear-gradient(to right, #6ba5ff, #b3ccff);*/
+    }
+    .cardLineRed{
+        transition: all 1s ;
+        background: linear-gradient(to right, #f54a49, #f99a9e);
+    }
+    .cardLineRed:hover{
+        background: linear-gradient(to right, #ee2124, #f98486);
+    }
+    .cardLineGreen{
+        transition: all 1s;
+        background: linear-gradient(to right, #6ba5ff, #b3ccff);
+    }
+    .cardLineGreen:hover{
+        background: linear-gradient(to right, #0c8dc2, #89b8d7);
+    }
+
+    .cardLine .el-divider--horizontal{
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+    /*.animated-line-move{*/
+    /*    transition: transform 1s;*/
+    /*}*/
+    /*.animated-line-cardLine{*/
+    /*    transition: all 5s;*/
+    /*}*/
+    .animated-line-enter-active {
+        transition: all 0.6s ;
+    }
+    .animated-line-leave-active{
+        transition: all 0.4s ;
+        /*transition-delay: 2s ;*/
+    }
+    .animated-line-enter{
+        transform: translateX(-80px);
+        opacity: 0;
+    }
+    .animated-line-leave-to{
+        transform: translateX(80px);
+        opacity: 0;
+    }
     .pp{
         position: absolute;
         width: 230px;
@@ -1164,14 +1815,9 @@
 
     .default-scrollbar {
         width: 100%;
-        height: 100%;
-    }
-    .flex-scrollbar {
-        width: auto;
-        height: auto;
-        -webkit-box-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
+        height: 716px;
+        overflow-x: hidden;
+        /*background-color: #4db3ff;*/
     }
     .el-scrollbar__wrap.default-scrollbar__wrap {
         overflow-x: auto;

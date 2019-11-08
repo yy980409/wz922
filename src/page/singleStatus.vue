@@ -19,7 +19,7 @@
 
                                 <div style="height:330px;width:500px;display: table-cell;vertical-align:middle;text-align: center;">
                                     <p style="color:#1d90e6;font-size:30px;">最新数据</p>
-                                    <p style="color:#1d90e6;font-size:30px;">{{temperature[0][1]}}℃</p>
+                                    <p style="color:#1d90e6;font-size:30px;">{{temperature[9][1]}}℃</p>
                                     <p style="color:#a9aaff;font-size:30px;"></p>
                                     <!--                        <p style="color:#a9aaff;font-size:20px;">更新于:{{}}</p>-->
                                 </div>
@@ -39,7 +39,7 @@
                             <el-col :span="8">
                                 <div style="height:330px;width:500px;display: table-cell;vertical-align:middle;text-align: center;">
                                     <p style="color:#1d90e6;font-size:30px;">最新数据</p>
-                                    <p style="color:#1d90e6;font-size:30px;">{{humidity[0][1]}}%RH</p>
+                                    <p style="color:#1d90e6;font-size:30px;">{{humidity[9][1]}}%RH</p>
                                     <p style="color:#1d90e6;font-size:30px;"></p>
                                     <!--                <p style="color:#a9aaff;font-size:20px;">更新于:</p>-->
                                 </div>
@@ -394,6 +394,7 @@ b
 	import headTop from '../components/headTop';
 	import lineMap from '../components/lineMap';
 	import {fanAutoOff,fanAutoOn,reStartPower,fanSpeed,fanOpen,fanClose,getDevAllInfo,getTemHum,powerOff,powerOn} from '@/api/getData';
+	import tempearatureHumidity from "./tempearatureHumidity";
 	export default {
 		name: "singleStatus",
 		components: {
@@ -484,19 +485,26 @@ b
 
 			},
             async getLineDate(){
-				const timeStatus =await getTemHum({device_id:this.device_id,limit:this.Tlimit, offset:this.Toffset}) ;
+				const result =await getTemHum({device_id:this.device_id,pageSize:this.Tlimit, currentPage:this.Toffset,queryString:{}}) ;
+				const timeStatus =result.result;
+                if(timeStatus.length<10)return;//后台数据不足
 				this.temperature=[];
 				this.humidity=[];
+
 				for(var i=0;i<timeStatus.length;i++){
 					var temp=[];
 					var humi=[];
 
-					temp[0]=this.timeStamp(timeStatus[i].create_time);
+					var time = timeStatus[i].time;
+
+
+					temp[0]=this.timeStamp(time);
 					temp[1]=parseFloat(timeStatus[i].temperature);
-					humi[0]=this.timeStamp(timeStatus[i].create_time);
+					humi[0]=this.timeStamp(time);
 					humi[1]=parseFloat(timeStatus[i].humidity);
 					this.temperature.push(temp);
 					this.humidity.push(humi);
+
 				}
             },
 			async initData(){
@@ -514,11 +522,19 @@ b
 
 				}
 			},
-			timeStamp(time){
-				var date = time.toString();
-				date = date.substring(0,19);
-				date = date.replace(/-/g,'/');
-				var timestamp = new Date(date).getTime();
+			timeStamp(utc_datetime){
+				// 转为正常的时间格式 年-月-日 时:分:秒
+				var T_pos = utc_datetime.indexOf('T');
+				var Z_pos = utc_datetime.indexOf('Z');
+				var year_month_day = utc_datetime.substr(0,T_pos);
+				var hour_minute_second = utc_datetime.substr(T_pos+1,Z_pos-T_pos-1);
+				var new_datetime = year_month_day+" "+hour_minute_second; // 2017-03-31 08:02:06
+                // 处理成为时间戳
+				timestamp = new Date(Date.parse(new_datetime));
+				timestamp = timestamp.getTime();
+				// 增加8个小时，北京时间比utc时间多八个时区
+				var timestamp = timestamp+8*60*60*1000;
+
 				return timestamp;
 			},
 			handleSizeChange(val) {
@@ -563,7 +579,7 @@ b
         },
         computed:{
 			roleShow:function(){
-			    return this.$store.state.user.role === ('ROLE_admin' || 'ROLE_controller');
+			    return this.$store.state.user.role === 'ROLE_admin' || this.$store.state.user.role === 'ROLE_controller';
             },
 			card2row:function(){
 				const uu=this.card;

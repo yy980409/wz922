@@ -1,5 +1,6 @@
 import {testUrl} from './env'
 import axios from 'axios'
+import store from '@/store/'
 
 export default async (url = '',data={},type = '') => {
     url = testUrl + url;
@@ -10,12 +11,35 @@ export default async (url = '',data={},type = '') => {
         await axios
             .post(url,data)
             .then(function (response){
+                // console.log(response)
                 json=response.data;
+            })
+            .catch(error => {
+                console.log(typeof error);
+                console.log(error);
+                // store.dispatch('logout','网络异常登出')
             });
         return json;
     }
 
+    //POST2
+    if(type==='post2'){
+        let json=null;
 
+        url=url+'?pid=-1';
+        await axios
+            .post(url,data)
+            .then(function (response){
+                // console.log(response)
+                json=response.data;
+            })
+            .catch(error => {
+                console.log(typeof error);
+                console.log(error);
+                // store.dispatch('logout','网络异常登出')
+            });
+        return json;
+    }
 
 
 
@@ -39,6 +63,11 @@ export default async (url = '',data={},type = '') => {
         .get(url)
         .then(function (response){
             json=response.data;
+        })
+        .catch(error => {
+            console.log(typeof error);
+            console.log(error);
+            // store.dispatch('logout','网络异常登出')
         });
 
    // console.log(json);

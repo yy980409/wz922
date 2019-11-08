@@ -50,7 +50,7 @@
 					this.$router.push('/manage');
 				}else if(command == 'signout'){
 
-					// const res = await signout()
+
                     const res = await logOut();
                     console.log(res);
 					if (res.status == 203) {
@@ -58,7 +58,7 @@
 	                        type: 'success',
 	                        message: '退出成功'
 	                    });
-						this.$store.dispatch('logout');
+						this.$store.dispatch('logout','注销成功');
 					}else{
 						this.$message({
 	                        type: 'error',

@@ -1,17 +1,19 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import router from '@/router'
 import {getAdminInfo} from '@/api/getData'
-
+import VueCookies from 'vue-cookies'
 Vue.use(Vuex);
 
 const state = {
 	adminInfo: {
 		avatar: 'default.jpg'
 	},
-    count:  window.localStorage.getItem('count')==null?0:window.localStorage.getItem('count'),
     user : {
-	    name:window.localStorage.getItem('user' || '[]') == null ? '未登录' : JSON.parse(window.localStorage.getItem('user' || '[]')).username,
-        role:window.localStorage.getItem('user' || '[]') == null ? '未登录' : JSON.parse(window.localStorage.getItem('user' || '[]')).roles[0].name,
+	    // name:window.localStorage.getItem('user' || '[]') == null ? '未登录' : JSON.parse(window.localStorage.getItem('user' || '[]')).username,
+        // role:window.localStorage.getItem('user' || '[]') == null ? '未登录' : JSON.parse(window.localStorage.getItem('user' || '[]')).roles[0].name,
+        name:$cookies.get("status") == null ? '未登录' : $cookies.get("status").username,
+        role:$cookies.get("status") == null ? '未登录' : $cookies.get("status").roles[0].name,
     },
     router:[]
 };
@@ -20,21 +22,27 @@ const mutations = {
 	saveAdminInfo(state, adminInfo){
 		state.adminInfo = adminInfo;
 	},
-    increment (state) {
-        window.localStorage.setItem('count', ++state.count);
-    },
     clear (state){
-	    state.count=0;
-        window.localStorage.removeItem('count');
+        state.router=[];
+        state.user={
+            name:'未登录',
+            role:'未登录'
+        }
     },
     login(state,user){
         state.user.name=user.username;
         state.user.role=user.roles[0].name;
-        window.localStorage.setItem('user', JSON.stringify(user));
+        $cookies.set("status", user, 0);
+        // window.localStorage.setItem('user', JSON.stringify(user));
     },
     logout(state){
-        window.localStorage.removeItem('user');
+        $cookies.remove("status");
+        // window.localStorage.removeItem('user');
         state.router=[];
+        state.user={
+            name:'未登录',
+            role:'未登录'
+        }
     },
     initMenu(state,routes){
 	    state.router = routes;
@@ -54,10 +62,12 @@ const actions = {
 			// console.log(err.message)
 		}
 	},
-    logout({commit}){
+    logout({commit},str){
         commit('logout');
-        location.reload()
-}
+        // location.reload();
+        router.push('/');
+        console.log(str);
+},
 };
 
 export default new Vuex.Store({

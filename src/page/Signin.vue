@@ -116,7 +116,7 @@
 
           this.loading = false;
           if(resp && resp.data.status==200){
-
+          	// this.$cookies.set("status", "logined", 15); // 设置cookie中存放的生命周期
 			this.$store.commit('login', resp.data.msg);
             this.$router.push('manage');
           }else{
@@ -126,6 +126,7 @@
 				  Message.error({message: "账户或密码错误"})
 			  }
 			  this.refresh();
+			  this.Form.imageCode="";
           }
         }).catch(err=>{
           console.log(err);

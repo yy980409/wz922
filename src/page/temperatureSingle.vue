@@ -2,17 +2,18 @@
     <div>
     <head-top ok="true" ></head-top>
         <el-card style="padding-top: 15px;">
-            <el-form :inline="true"  class="demo-form-inline">
+            <el-form :inline="true"  class="demo-form-inline" @submit.native.prevent>
                 <el-form-item label="设备号">
                     <el-input :disabled=disabled :placeholder=this.$route.query.device_id></el-input>
                 </el-form-item>
                 <el-form-item >
-                    <el-button type="primary" @click="onSubmit">搜索</el-button>
+                    <el-button v-show="!showSearch" type="primary" @click="onSubmit">搜索</el-button>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="showSearch=!showSearch">高级搜索</el-button>
+                    <el-button v-show="!showSearch"  type="text" @click="showSearch=true">[ 高级搜索 ]</el-button>
                 </el-form-item>
-                <Search @uploaddata="getQuery" :lines='lines' v-show="showSearch"></Search>
+                <Search @uploaddata="getQuery"  @commitSearch="onSubmit" @searchSwitch="showSearch=false"
+                        :lines='lines' v-show="showSearch"></Search>
             </el-form>
         </el-card>
 
@@ -68,7 +69,7 @@
 					},
 					{
 						title: '创建时间',
-						key: 'create_time'
+						key: 'time'
 					}
 				]
 			}

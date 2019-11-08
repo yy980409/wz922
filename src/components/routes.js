@@ -18,6 +18,7 @@ const recloseSingle = r => require.ensure([], () =>r(require('@/page/recloseSing
 const pm25Luminance = r => require.ensure([], () =>r(require('@/page/pm25Luminance')), 'pm25Luminance');
 const pm25LuminanceSingle = r => require.ensure([], () =>r(require('@/page/pm25LuminanceSingle')), 'pm25LuminanceSingle');
 const deviceControl = r => require.ensure([], () =>r(require('@/page/deviceControl')), 'deviceControl');
+const tt = r => require.ensure([], () =>r(require('@/components/powerControl')), 'powerControl');
 
 function deepClone(obj){
     let objClone = Array.isArray(obj)?[]:{};
@@ -125,65 +126,17 @@ const adminTemp=[
     {
         path: '/devices',
         component: devices,
-        meta: ['添加数据', '添加商铺'],
+        meta: ['设备管理', '设备添加'],
     },{
         path: '/user',
         component: user,
-        meta: ['添加数据', '添加商铺'],
+        meta: ['用户管理', '用户信息'],
     },
 ];
 const adminR = addLimit(controllerR,adminTemp);
 
 
-/*
-const adminR =  [
-    {
-        path: '/',
-        component: Signin,
-        meta: ['', ''],
-    },
-    {
-        // path: '/manage',
-        path: '/manage',
-        component: manage,
-        name: '',
-        children: [{
-            path: '',
-            component: HomeMap,
-            meta: [],
-        },{	path: '/test',
-            component: test,
-            meta: ['设备状态', '所有设备状态'],
-        },{
-            path: '/HomeMap',
-            component: HomeMap,
-            meta: [],
-        },{
-            path: '/singleStatus',
-            component: singleStatus,
-            meta: ['设备状态', '单设备状态'],
-        },,{
-            path: '/tempearatureHumidity',
-            component: tempearatureHumidity,
-            meta: ['设备状态'],
-        },{
-            path: '/temperatureSingle',
-            component: temperatureSingle,
-            meta: ['设备状态', '单设备状态'],
-        },{
-            path: '/devices',
-            component: devices,
-            meta: ['添加数据', '添加商铺'],
-        },{
-            path: '/user',
-            component: user,
-            meta: ['添加数据', '添加商铺'],
-        },
 
-        ]
-    }
-];
-*/
 
 
 export {

@@ -1,6 +1,28 @@
 import fetch from '@/config/fetch'
 import axios from '@/config/axios'
 
+
+
+/**
+ * 批量控制
+ */
+
+export const getProtectorStatus = data =>(axios('/device/remoteControl/protector',data));
+/**
+ * 设备分区树
+ */
+export const getAllTree = data =>(axios('/basic/getAreaTree',data,'post2'));
+export const getOneTree = data =>(axios('/device/area',data));
+
+
+
+/**
+ * 获取订单
+ */
+export const getOrder = data =>(axios('/getOrderByDid',data));
+
+
+
 /**
  * 登出
  */
@@ -10,8 +32,8 @@ export const logOut = data =>(axios('/logout',data));
  */
 export const postTemHumLatest = data =>(axios('/device/temperature_and_humidity/latest',data,'post'));
 export const postTemHumHistory = data =>(axios('/device/temperature_and_humidity/query',data,'post'));
-export const postPMLumLatest = data =>(axios('/device/airLight/latest',data,'post'));
-export const postPMLumHistory = data =>(axios('/device/airLight/query',data,'post'));
+export const postPMLumLatest = data =>(axios('/device/air_light/latest',data,'post'));
+export const postPMLumHistory = data =>(axios('/device/air_light/query',data,'post'));
 export const postRecloseLatest = data =>(axios('/device/auto_reclosing_power_protector/latest',data,'post'));
 export const postRecloseHistory = data =>(axios('/device/auto_reclosing_power_protector/query',data,'post'));
 
@@ -32,9 +54,9 @@ export const getErrorInfo = data =>(axios('/device/ErrTables',data));
 /**
  * 获取设备信息
  */
-export const getDevAllInfo = data =>(axios('/device/test',data));
+export const getDevAllInfo = data =>(axios('/device/sensors/detail',data));
 export const getDevCount = data =>(axios('/device/totalInformation',data));
-export const getDevSensors = data =>(axios('/device/sensors',data));
+export const getDevSensors = data =>(axios('/device/sensors/map',data));
 /**
  * 获取设备GPS、分区
  */
@@ -72,7 +94,7 @@ export const getLatesTemById = data =>(axios('/device/temperature_and_humidity/l
 export const getLatesTemCount = data =>(axios('/device/temperature_and_humidity/latest/count',data));
 export const getLatesTem = data =>(axios('/device/temperature_and_humidity/latest',data));
 export const getTemHumCount = data =>(axios('/device/temperature_and_humidity/count',data));
-export const getTemHum = data =>(axios('/device/temperature_and_humidity',data));
+export const getTemHum = data =>(axios('/device/temperature_and_humidity/query',data,'post'));
 /**
  * 登陆
  */

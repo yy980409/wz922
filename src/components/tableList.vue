@@ -65,6 +65,20 @@
 
 			},
         },
+        watch:{
+			'tableData':{
+				handler:async function(val){
+					val.forEach(item =>{
+						if(item.time){
+							var date2 = new Date(item.time);
+							var localeString = date2.toLocaleString();
+							item.time=localeString
+						}
+                        // item.time= item.time.replace(/[A-z]/g,' ');
+                    })
+				},
+			},
+        }
 	}
 </script>
 

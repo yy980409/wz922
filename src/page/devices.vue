@@ -29,6 +29,7 @@
                            fixed="right" label="操作" width="">
             <template slot-scope="scope">
               <el-button type="primary" size="small" @click="edit(scope.row)">设备信息</el-button>
+                <el-button type="primary" size="small" @click="makesureDelete(scope.row)">删除设备</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -207,8 +208,7 @@
         }
       }
       return{
-        //Host: 'http://172.26.199.19:8080',
-		  Host: 'http://139.9.198.72:8082',
+          Host: testUrl,
         keywords: '',
         devices: [],
         types: [],
@@ -308,6 +308,35 @@
           _this.loaddevices();
         })
       },
+        makesureDelete(row){
+          console.log(row)
+            var _this = this;
+            _this.$confirm('如果继续将删除设备'+row.id+'，删除后将无法恢复，请谨慎操作！','你确定要删除设备吗？',{
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning',
+            }).then(() => {
+                _this.deletedevice(row)
+
+            }).catch(() => {
+                _this.$message({
+                    type: 'info',
+                    message: '已取消删除'
+                });
+            })
+        },
+        deletedevice(row){
+            var _this = this;
+            _this.tableloading = true;
+             let param = {}
+             param['device_id']=row.id;
+             console.log(param)
+            _this.$axios.post(this.Host+"/basic/deleteDevice",param).then(resp => {
+                console.log(resp);
+                _this.addVisible = false;
+                _this.loaddevices();
+            })
+        },
     }
   }
 </script>
